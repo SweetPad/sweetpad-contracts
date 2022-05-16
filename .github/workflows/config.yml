@@ -12,7 +12,12 @@ jobs:
     name: hardhat test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/init
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: actions/checkout@v2
+      - name: Install Dependecies
+        run: npm install
       - name: Run tests
         run: npm run test
 
@@ -20,8 +25,27 @@ jobs:
     name: linters Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/init
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: actions/checkout@v2
+      - name: Install Dependecies
+        run: npm install
       - name: Run solhint
         run: npm run solhint
       - name: Run eslint
         run: npm run eslint
+
+  coverage:
+    name: test coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: actions/checkout@v2
+      - name: Install Dependecies
+        run: npm install
+      - name: run coverage
+        run: npm run coverage
+
