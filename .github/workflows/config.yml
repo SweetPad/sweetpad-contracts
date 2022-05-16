@@ -1,11 +1,10 @@
 name: Checks before merge
 
 on:
-  push:
+  pull_request_review:
     branches:
       - main
       - dev
-      - stage
 
 jobs:
   hardhat-test:
@@ -48,6 +47,20 @@ jobs:
         run: npm install
       - name: run coverage
         run: npm run coverage
-      - name: send to Codecov
-        run: npx codecov
+      # - name: send to Codecov
+      #   run: npx codecov
+
+  audit:
+    name: slither audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: actions/checkout@v2
+      - run: sudo apt update
+      - run: sudo apt install -y libsecret-1-dev libusb-1.0-0-dev libudev-dev
+      - run: pip install slither-analyzer
+      - name: Install Dependecies
+        run: npm install
 
