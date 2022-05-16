@@ -1,23 +1,13 @@
-const IS_TEST_DEPLOY = process.env.IS_TEST_DEPLOY === "true";
-console.log("🚀 ~ file: networks.js ~ line 2 ~ IS_TEST_DEPLOY", IS_TEST_DEPLOY)
-const NETWORK_TAG = process.env.NETWORK_TAG === "Hardhat";
-
-let tag = "Hardhat";
-let deploy = "./deploy/hardhat";
-
-if (IS_TEST_DEPLOY) {
-	tag = NETWORK_TAG;
-	deploy = "./deploy";
-}
-
-const FORKING_API_KEY = process.env.FORKING_API_KEY;
-console.log("🚀 ~ file: networks.js ~ line 14 ~ FORKING_API_KEY", FORKING_API_KEY)
+const FORKING_API_KEY = process.env.FORKING_API_KEY || "";
+const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
 
 module.exports = {
 	networks: {
 		localhost: {
 			chainId: 31337,
-			url: "http://127.0.0.1:8545"
+			url: "http://127.0.0.1:8545",
+			tags: ["dev"],
+			deploy: ["./deploy/dev"]
 		},
 		hardhat: {
 			chainId: 31337,
@@ -35,8 +25,11 @@ module.exports = {
 			// initialDate: new Date("01/01/2021"),
 			allowUnlimitedContractSize: true,
 			initialBaseFeePerGas: 0,
-			tags: [tag],
-			deploy: [deploy]
+			tags: ["dev"],
+			deploy: ["./deploy/dev"],
+			env: {
+				name: "test variable"
+			}
 		},
 		bsc: {
 			chainId: 56,
@@ -47,8 +40,8 @@ module.exports = {
 				count: 20
 			},
 			url: "https://bsc-dataseed.binance.org",
-			tags: ["bsc"],
-			deploy: ["./deploy/bsc"]
+			tags: ["prod"],
+			deploy: ["./deploy/prod"]
 		},
 		"bsc-testnet": {
 			chainId: 97,
@@ -60,8 +53,8 @@ module.exports = {
 				count: 20
 			},
 			url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
-			tags: ["bsc-testnet"],
-			deploy: ["./deploy/bsc-testnet"]
+			tags: ["stage"],
+			deploy: ["./deploy/stage"]
 		},
 		rinkeby: {
 			chainId: 4,
@@ -71,9 +64,9 @@ module.exports = {
 				initialIndex: 0,
 				count: 20
 			},
-			url: `https://eth-rinkeby.alchemyapi.io/v2/${process.env.ALCHEMY_API_KEY}`,
-			tags: ["rinkeby"],
-			deploy: ["./deploy/rinkeby"]
+			url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+			tags: ["stage"],
+			deploy: ["./deploy/stage"]
 		},
 	},
 	defaultConfig: {

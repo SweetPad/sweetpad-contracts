@@ -1,4 +1,4 @@
-async function deploySweetpadToken({ msg }, { deployments: { deploy }, ethers: { getNamedSigners, getContract, utils } }) {
+module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, getContract }}) => {
 	const { deployer } = await getNamedSigners();
 
 	await deploy("SweetpadToken", {
@@ -11,8 +11,5 @@ async function deploySweetpadToken({ msg }, { deployments: { deploy }, ethers: {
 	const sweetpadToken = await getContract("SweetpadToken");
 
 	return sweetpadToken;
-}
-
-module.exports = {
-	deploySweetpadToken
 };
+module.exports.tags = ["SweetpadToken", "prod"];
