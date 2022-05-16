@@ -3,7 +3,7 @@ name: Checks before merge
 on:
   push:
     branches:
-      - master
+      - main
       - dev
       - stage
 
