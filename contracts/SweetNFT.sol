@@ -89,8 +89,8 @@ contract SweetNFT is ERC721, Ownable {
         uint256[] memory ids_,
         bytes memory data_
     ) external {
-        for (uint256 i; i < ids_.length; i++) {
-            _safeTransfer(msg.sender, to_, ids_[i], data_);
+        for (uint256 j; j < ids_.length; j++) {
+            _safeTransfer(msg.sender, to_, ids_[j], data_);
         }
     }
 
