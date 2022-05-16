@@ -25,13 +25,3 @@ jobs:
         run: npm run solhint
       - name: Run eslint
         run: npm run eslint
-
-  audit:
-    name: slither audit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/init
-      - run: sudo apt update
-      - run: sudo apt install -y libsecret-1-dev libusb-1.0-0-dev libudev-dev
-      - run: pip install slither-analyzer
-      - run: npm run slither
