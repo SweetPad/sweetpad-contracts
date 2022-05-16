@@ -1,11 +1,10 @@
 name: Checks before merge
 
 on:
-  push:
+  pull_request_review:
     branches:
       - main
       - dev
-      - stage
 
 jobs:
   hardhat-test:
