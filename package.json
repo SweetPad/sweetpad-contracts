@@ -2,8 +2,8 @@
 	"name": "QuickStart",
 	"license": "MIT",
 	"scripts": {
-		"compile": "npm run prettier:solidity && npx hardhat compile",
-		"test": "npm run eslint:fix && IS_TEST_DEPLOY=true npx hardhat test",
+		"compile": "npx hardhat compile",
+		"test": "IS_TEST_DEPLOY=true npx hardhat test",
 		"coverage": "IS_TEST_DEPLOY=true npx hardhat coverage",
 		"deploy": "npm run eslint:fix && npx hardhat deploy",
 		"verify:bsc-testnet": "npx hardhat etherscan-verify --network bsc-testnet --solc-input",
