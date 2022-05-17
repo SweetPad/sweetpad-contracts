@@ -9,7 +9,7 @@ const {
 } = require("hardhat");
 
 const setupFixture = createFixture(async () => {
-	await fixture(["", "Hardhat"]);
+	await fixture(["", "dev"]);
 
 	const sweetpadToken = await getContract("SweetpadToken");
 

@@ -1,2 +1,1 @@
 require("./utils");
-require("./deploy");
