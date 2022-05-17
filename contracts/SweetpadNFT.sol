@@ -18,50 +18,37 @@ contract SweetpadNFT is ERC721, Ownable {
     /// @dev ERC1155 id, Indicates a specific token or token type
     Counters.Counter private idCounter;
 
-    uint8[] public boost = [5, 12, 30];
+    enum Tier { 
+        One,
+        Two,
+        Three
+    }
+
     string private baseURI = "ipfs://";
 
     /// @dev The data for each SweetpadNFT token
-    mapping(uint256 => uint8) public idToTier;
+    mapping(uint256 => Tier) public idToTier;
+    mapping(Tier => uint256) public tierToBoost;
 
     /// @notice Emitted when new NFT is minted
-    event NFTMinted(uint256 indexed id, uint8 tier, address owner);
+    event Create(uint256 indexed id, Tier indexed tier, address indexed owner);
 
     /**
      * @notice Initialize contract
      */
-    constructor() ERC721("SweetpadNFT", "SWTNFT") {}
+    constructor() ERC721("SweetpadNFT", "SWTNFT") {
+        tierToBoost[Tier.One] = 5;
+        tierToBoost[Tier.Two] = 12;
+        tierToBoost[Tier.Three] = 30;
+    }
 
     /*** External user-defined functions ***/
-
-    function supportsInterface(bytes4 interfaceId) public view override(ERC721) returns (bool) {
-        return interfaceId == type(IERC721).interfaceId;
+    function setBaseURI(string memory baseURI_) external onlyOwner {
+        baseURI = baseURI_;
     }
 
-    /**
-     * @notice Mint new 721 standard token
-     * @param tier_ tier
-     */
-    function mint(address account_, uint8 tier_) public onlyOwner {
-        require(tierExists(tier_), "SweetpadNFT: Tier doesn't exist");
-        idCounter.increment();
-        uint256 id = idCounter.current();
-
-        _mint(account_, id);
-        idToTier[id] = tier_;
-
-        emit NFTMinted(id, tier_, account_);
-    }
-
-    /**
-     * @notice Mint new ERC721 standard tokens in one transaction
-     * @param account_ The address of the owner of tokens
-     * @param tiers_ Array of tiers
-     */
-    function mintBatch(address account_, uint8[] memory tiers_) external onlyOwner {
-        for (uint256 i = 0; i < tiers_.length; i++) {
-            mint(account_, tiers_[i]);
-        }
+    function currentID() external view returns (uint256) {
+        return idCounter.current();
     }
 
     /**
@@ -94,16 +81,33 @@ contract SweetpadNFT is ERC721, Ownable {
         }
     }
 
-    /// @notice Checks if the specified Tier exists
-    /// @param tier_ The Tier that is being checked
-    function tierExists(uint8 tier_) public view returns (bool) {
-        return tier_ < 4 && tier_ > 0;
+    /**
+     * @notice Mint new 721 standard token
+     * @param tier_ tier
+     */
+    function safeMint(address account_, Tier tier_) external onlyOwner {
+        _mint(account_, tier_);
     }
 
-    function tokenURI(uint256 tokenId) public view override returns (string memory) {
+    /**
+     * @notice Mint new ERC721 standard tokens in one transaction
+     * @param account_ The address of the owner of tokens
+     * @param tiers_ Array of tiers
+     */
+    function safeMintBatch(address account_, Tier[] memory tiers_) external onlyOwner {
+        for (uint256 i = 0; i < tiers_.length; i++) {
+            _mint(account_, tiers_[i]);
+        }
+    }
+
+    function supportsInterface(bytes4 interfaceId) public pure override(ERC721) returns (bool) {
+        return interfaceId == type(IERC721).interfaceId;
+    }
+
+    function tokenURI(uint256 tokenId_) public view override returns (string memory) {
         return
-            idToTier[tokenId] != 0
-                ? string(abi.encodePacked(_baseURI(), "/", Strings.toString(tokenId), ".json"))
+            _exists(tokenId_)
+                ? string(abi.encodePacked(_baseURI(), Strings.toString(tokenId_), ".json"))
                 : _baseURI();
     }
 
@@ -111,11 +115,17 @@ contract SweetpadNFT is ERC721, Ownable {
         return baseURI;
     }
 
-    function setBaseURI(string memory baseURI_) external onlyOwner {
-        baseURI = baseURI_;
-    }
+    /**
+     * @notice Mint new 721 standard token
+     * @param tier_ tier
+     */
+    function _mint(address account_, Tier tier_)  private {
+        idCounter.increment();
+        uint256 id = idCounter.current();
 
-    function currentID() external view returns (uint256) {
-        return idCounter.current();
+        _safeMint(account_, id);
+        idToTier[id] = tier_;
+
+        emit Create(id, tier_, account_);
     }
 }
