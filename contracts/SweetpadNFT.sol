@@ -18,7 +18,7 @@ contract SweetpadNFT is ERC721, Ownable {
     /// @dev ERC1155 id, Indicates a specific token or token type
     Counters.Counter private idCounter;
 
-    enum Tier { 
+    enum Tier {
         One,
         Two,
         Three
@@ -106,9 +106,7 @@ contract SweetpadNFT is ERC721, Ownable {
 
     function tokenURI(uint256 tokenId_) public view override returns (string memory) {
         return
-            _exists(tokenId_)
-                ? string(abi.encodePacked(_baseURI(), Strings.toString(tokenId_), ".json"))
-                : _baseURI();
+            _exists(tokenId_) ? string(abi.encodePacked(_baseURI(), Strings.toString(tokenId_), ".json")) : _baseURI();
     }
 
     function _baseURI() internal view override returns (string memory) {
@@ -119,7 +117,7 @@ contract SweetpadNFT is ERC721, Ownable {
      * @notice Mint new 721 standard token
      * @param tier_ tier
      */
-    function _mint(address account_, Tier tier_)  private {
+    function _mint(address account_, Tier tier_) private {
         idCounter.increment();
         uint256 id = idCounter.current();
 
