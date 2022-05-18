@@ -17,7 +17,7 @@ import "./interfaces/ISweetpadNFT.sol";
 contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     using Counters for Counters.Counter;
 
-    /// @dev ERC1155 id, Indicates a specific token or token type
+    /// @dev ERC721 id, Indicates a specific token or token type
     Counters.Counter private idCounter;
 
     string private baseURI = "ipfs://";
