@@ -20,7 +20,7 @@
 		"prepare": "husky install"
 	},
 	"devDependencies": {
-		"@atixlabs/hardhat-time-n-mine": "^0.0.5",
+		"@atixlabs/hardhat-time-n-mine": "0.0.5",
 		"@chainlink/contracts": "^0.4.1",
 		"@nomiclabs/hardhat-ethers": "^2.0.6",
 		"@nomiclabs/hardhat-etherscan": "^3.0.3",
