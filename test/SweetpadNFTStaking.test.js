@@ -9,17 +9,17 @@ const {
 
 describe("SweetpadNFTStaking", function () {
 	let deployer, caller;
-	let sweetNFT, sweetNFTStaking;
+	let sweetpadNFT, sweetpadNFTStaking;
 
 	const setupFixture = createFixture(async () => {
 		await fixture(["", "dev"]);
 	
-		const sweetNFT = await getContract("SweetpadNFT");
-		const sweetNFTStaking = await getContract("SweetpadNFTStaking", caller);
+		const sweetpadNFT = await getContract("SweetpadNFT");
+		const sweetpadNFTStaking = await getContract("SweetpadNFTStaking", caller);
 	
-		await sweetNFT.safeMintBatch(deployer.address, [0, 1, 2, 0]);
+		await sweetpadNFT.safeMintBatch(deployer.address, [0, 1, 2, 0]);
 	
-		return [sweetNFT, sweetNFTStaking];
+		return [sweetpadNFT, sweetpadNFTStaking];
 	});
 
 	before("Before All: ", async function () {
@@ -27,21 +27,21 @@ describe("SweetpadNFTStaking", function () {
 	});
 
 	beforeEach(async function () {
-		[sweetNFT, sweetNFTStaking] = await setupFixture();
+		[sweetpadNFT, sweetpadNFTStaking] = await setupFixture();
 	});
 
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
-			expect(await sweetNFTStaking.nft()).to.equal(sweetNFT.address);
+			expect(await sweetpadNFTStaking.nft()).to.equal(sweetpadNFT.address);
 		});
 	});
 
 	describe("getTicketsCountForNFT: ", function () {
 		it("Should return correct value for every tier", async function () {
-			expect(await sweetNFTStaking.getTicketsCountForNFT(1)).to.equal(5);
-			expect(await sweetNFTStaking.getTicketsCountForNFT(2)).to.equal(12);
-			expect(await sweetNFTStaking.getTicketsCountForNFT(3)).to.equal(30);
-			expect(await sweetNFTStaking.getTicketsCountForNFT(4)).to.equal(5);
+			expect(await sweetpadNFTStaking.getTicketsCountForNFT(1)).to.equal(5);
+			expect(await sweetpadNFTStaking.getTicketsCountForNFT(2)).to.equal(12);
+			expect(await sweetpadNFTStaking.getTicketsCountForNFT(3)).to.equal(30);
+			expect(await sweetpadNFTStaking.getTicketsCountForNFT(4)).to.equal(5);
 		});
 	});
 });
