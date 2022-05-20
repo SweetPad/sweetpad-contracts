@@ -29,7 +29,7 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     /**
      * @notice Initialize contract
      */
-    constructor() ERC721("SweetpadNFT", "SWTNFT") {
+    constructor() ERC721("Sweet Dragon", "SWTD") {
         tierToBoost[Tier.One] = 5;
         tierToBoost[Tier.Two] = 12;
         tierToBoost[Tier.Three] = 30;

@@ -15,9 +15,9 @@ describe("SweetpadNFT", function () {
 	});
 
 	it("Should initialize correct", async function () {
-		expect(await sweetpadNFT.name()).to.equal("SweetpadNFT");
+		expect(await sweetpadNFT.name()).to.equal("Sweet Dragon");
 		expect(await sweetpadNFT.owner()).to.equal(deployer.address);
-		expect(await sweetpadNFT.symbol()).to.equal("SWTNFT");
+		expect(await sweetpadNFT.symbol()).to.equal("SWTD");
 		expect(await sweetpadNFT.tokenURI(0)).to.equal("ipfs://");
 		expect(await sweetpadNFT.tierToBoost(0)).to.equal(5);
 		expect(await sweetpadNFT.tierToBoost(1)).to.equal(12);

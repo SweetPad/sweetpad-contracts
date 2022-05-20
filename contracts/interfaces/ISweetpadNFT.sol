@@ -15,14 +15,14 @@ interface ISweetpadNFT is IERC721, IERC721Metadata {
 
     function tierToBoost(Tier) external view returns (uint256);
 
-    function setBaseURI(string memory baseURI_) external;
+    function setBaseURI(string memory) external;
 
     function currentID() external view returns (uint256);
 
-    function safeMint(address account_, Tier tier_) external;
+    function safeMint(address, Tier) external;
 
-    function safeMintBatch(address account_, Tier[] memory tiers_) external;
+    function safeMintBatch(address, Tier[] memory) external;
 
     /// @notice Emitted when new NFT is minted
-    event Create(uint256 indexed id, Tier indexed tier, address indexed owner);
+    event Create(uint256 indexed, Tier indexed, address indexed);
 }
