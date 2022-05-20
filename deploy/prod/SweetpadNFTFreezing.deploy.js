@@ -3,13 +3,13 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 	
 	const sweetpadNFT = await getContract("SweetpadNFT");
 
-	await deploy("SweetpadNFTStaking", {
+	await deploy("SweetpadNFTFreezing", {
 		from: deployer.address,
-		contract: "SweetpadNFTStaking",
+		contract: "SweetpadNFTFreezing",
 		args: [sweetpadNFT.address],
 		log: true,
 	});
 };
 
-module.exports.tags = ["SweetpadNFTStaking", "prod"];
+module.exports.tags = ["SweetpadNFTFreezing", "prod"];
 module.exports.dependencies = ["SweetpadNFT"];
