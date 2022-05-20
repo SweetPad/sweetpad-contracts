@@ -8,15 +8,8 @@ import "./interfaces/ISweetpadNFT.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
     /// @notice Blocks per day for BSC
-    uint256 public constant BLOCKS_PER_DAY = 28674;
-    ISweetpadNFT public nft;
-
-    struct NFTData {
-        // Account that froze NFT
-        address freezer;
-        // block after which freezer can unfreeze NFT
-        uint256 freezeEndBlock;
-    }
+    uint256 public constant override BLOCKS_PER_DAY = 28674;
+    ISweetpadNFT public override nft;
 
     /// @notice NFT id -> frozen NFT data
     mapping(uint256 => NFTData) public nftData;
