@@ -69,7 +69,7 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
         uint256[] memory ids_,
         bytes memory data_
     ) external {
-        for (uint256 i; i < ids_.length; i++) {
+        for (uint256 i = 0; i < ids_.length; i++) {
             _safeTransfer(msg.sender, to_, ids_[i], data_);
         }
     }
