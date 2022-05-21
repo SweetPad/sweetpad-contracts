@@ -50,27 +50,15 @@ contract Staking {
         require(sweetToken.balanceOf(msg.sender) >= amount_, "Insufficient tokens");
         require(182 <= period_ && period_ <= 1095, "Wrong period");
         require(getPower(amount_, period_) >= 10000 ether, "At least 10.000 xSWT is required");
-        uint256 power;
-        if (period_ == 182) {
-            power = amount_ / 2;
-        }
-
-        if (period_ > 182 && period_ <= 365) {
-            power = (period_ * amount_) / 365;
-        }
-
-        if (period_ > 365 && period_ <= 1095) {
-            power = ((period_ - 365 + 730) * amount_) / 730;
-        }
         stakes[msg.sender].push(
             UserInfo({
                 frozenUntil: block.number + period_ * BLOCKS_PER_DAY,
                 period: period_,
                 frozenAmount: amount_,
-                power: power
+                power: getPower(amount_, period_)
             })
         );
-        totalPower[msg.sender] += power;
+        totalPower[msg.sender] += getPower(amount_, period_);
         sweetToken.transferFrom(msg.sender, address(this), amount_);
     }
 
