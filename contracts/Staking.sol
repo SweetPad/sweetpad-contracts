@@ -3,8 +3,11 @@
 pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract Staking {
+    using SafeERC20 for sweetToken;
+
     uint256 public constant BLOCKS_PER_DAY = 10;
 
     struct UserInfo {
