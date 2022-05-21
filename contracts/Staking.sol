@@ -3,7 +3,6 @@
 pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "hardhat/console.sol";
 
 contract Staking {
     uint256 public constant BLOCKS_PER_DAY = 10;
@@ -11,7 +10,7 @@ contract Staking {
     struct UserInfo {
         uint256 frozenUntil;
         uint256 period;
-        uint256 stakedAmount;
+        uint256 frozenAmount;
         uint256 power;
     }
 
@@ -47,8 +46,8 @@ contract Staking {
         return stakes[staker_];
     }
 
-    function stakeSWT(uint256 amount_, uint256 period_) external {
-        require(sweetToken.balanceOf(msg.sender) >= amount_, "INSUFFICIENT TOKENS");
+    function freezeSWT(uint256 amount_, uint256 period_) external {
+        require(sweetToken.balanceOf(msg.sender) >= amount_, "Insufficient tokens");
         require(182 <= period_ && period_ <= 1095, "Wrong period");
         require(getPower(amount_, period_) >= 10000 ether, "At least 10.000 xSWT is required");
         uint256 power;
@@ -68,25 +67,25 @@ contract Staking {
             UserInfo({
                 frozenUntil: block.number + period_ * BLOCKS_PER_DAY,
                 period: period_,
-                stakedAmount: amount_,
+                frozenAmount: amount_,
                 power: power
             })
         );
         totalPower[msg.sender] += power;
     }
 
-    function unstakeSWT(uint256 id, uint256 amount_) external {
+    function unfreezeSWT(uint256 id, uint256 amount_) external {
         require((getStakes(msg.sender)).length >= 1 && (getStakes(msg.sender)).length > id, "Wrong id");
-        require(stakes[msg.sender][id].stakedAmount != 0, "Staked amount is Zero");
+        require(stakes[msg.sender][id].frozenAmount != 0, "Staked amount is Zero");
         require(
-            getPower(stakes[msg.sender][id].stakedAmount - amount_, stakes[msg.sender][id].period) >= 10000 ether ||
-                getPower(stakes[msg.sender][id].stakedAmount - amount_, stakes[msg.sender][id].period) == 0,
+            getPower(stakes[msg.sender][id].frozenAmount - amount_, stakes[msg.sender][id].period) >= 10000 ether ||
+                getPower(stakes[msg.sender][id].frozenAmount - amount_, stakes[msg.sender][id].period) == 0,
             "At least 10.000 xSWT is required"
         );
         require(block.number >= stakes[msg.sender][id].frozenUntil, "Locked period dosn`t pass");
         totalPower[msg.sender] -= getPower(amount_, stakes[msg.sender][id].period);
         stakes[msg.sender][id].power -= getPower(amount_, stakes[msg.sender][id].period);
-        stakes[msg.sender][id].stakedAmount -= amount_;
+        stakes[msg.sender][id].frozenAmount -= amount_;
         sweetToken.transfer(msg.sender, amount_);
     }
 }
