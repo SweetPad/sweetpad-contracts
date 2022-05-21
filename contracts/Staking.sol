@@ -62,7 +62,7 @@ contract Staking {
             })
         );
         totalPower[msg.sender] += getPower(amount_, period_);
-        sweetToken.transferFrom(msg.sender, address(this), amount_);
+        sweetToken.safeTransferFrom(msg.sender, address(this), amount_);
     }
 
     function unfreezeSWT(uint256 id, uint256 amount_) external {
@@ -77,6 +77,6 @@ contract Staking {
         totalPower[msg.sender] -= getPower(amount_, stakes[msg.sender][id].period);
         stakes[msg.sender][id].power -= getPower(amount_, stakes[msg.sender][id].period);
         stakes[msg.sender][id].frozenAmount -= amount_;
-        sweetToken.transfer(msg.sender, amount_);
+        sweetToken.safeTransfer(msg.sender, amount_);
     }
 }
