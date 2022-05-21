@@ -62,7 +62,6 @@ contract Staking {
         if (period_ > 365 && period_ <= 1095) {
             power = ((period_ - 365 + 730) * amount_) / 730;
         }
-        sweetToken.transferFrom(msg.sender, address(this), amount_);
         stakes[msg.sender].push(
             UserInfo({
                 frozenUntil: block.number + period_ * BLOCKS_PER_DAY,
@@ -72,6 +71,7 @@ contract Staking {
             })
         );
         totalPower[msg.sender] += power;
+        sweetToken.transferFrom(msg.sender, address(this), amount_);
     }
 
     function unfreezeSWT(uint256 id, uint256 amount_) external {
