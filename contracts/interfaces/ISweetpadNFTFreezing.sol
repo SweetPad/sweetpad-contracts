@@ -12,19 +12,21 @@ interface ISweetpadNFTFreezing {
         uint256 freezeEndBlock;
     }
 
-    function freeze(uint256) external;
+    function freeze(uint128, uint128) external;
 
-    function FREEZE_DURATION() external view returns (uint256);
+    function BLOCKS_PER_DAY() external view returns (uint256);
 
     function nft() external view returns (ISweetpadNFT);
 
     function ticket() external view returns (ISweetpadTicket);
 
-    function getTicketsCountForNFT(uint256) external view returns (uint256);
-
     function setSweetpadNFT(address) external;
 
     function setSweetpadTicket(address) external;
 
-    event Frozen(address indexed, uint256, uint256);
+    function getTicketsCountForNFT(uint256) external view returns (uint256);
+
+    function getNftsFrozeByUser(address) external view returns (uint256[] memory);
+
+    event Frozen(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
 }
