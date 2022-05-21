@@ -63,4 +63,6 @@ jobs:
       - run: pip install slither-analyzer
       - name: Install Dependecies
         run: npm install
+      - name: run slither
+        run: npm run slither
 
