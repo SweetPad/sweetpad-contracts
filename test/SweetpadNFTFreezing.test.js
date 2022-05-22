@@ -40,9 +40,9 @@ describe("SweetpadNFTFreezing", function () {
 	});
 
 	describe("freeze: ", function () {
-		it("Should revert with 'SweetpadNFTFreezing: NFT not belong to user'", async function () {
+		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
 			await expect(sweetpadNFTFreezing.connect(deployer).freeze(1, 182)).to.revertedWith(
-				"SweetpadNFTFreezing: NFT not belong to user"
+				"ERC721: transfer caller is not owner nor approved"
 			);
 		});
 
@@ -78,6 +78,45 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 1, freezeEndBlock, 10);
+		});
+	});
+
+	describe("freezeBatch: ", function () {
+		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
+			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2], [182, 182])).to.revertedWith(
+				"ERC721: transfer caller is not owner nor approved"
+			);
+		});
+
+		it("Should revert with 'SweetpadNFTFreezing: Array lengths is not equal'", async function () {
+			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [182, 182])).to.revertedWith(
+				"SweetpadNFTFreezing: Array lengths is not equal"
+			);
+		});
+
+		it("Should revert with 'SweetpadNFTFreezing: Freeze period must be greater than 182 days'", async function () {
+			await expect(sweetpadNFTFreezing.freezeBatch([1, 2], [181, 182])).to.revertedWith(
+				"SweetpadNFTFreezing: Freeze period must be greater than 182 days"
+			);
+		});
+
+		it("Should freeze nfts in SweetpadNFTFreezing contract", async function () {
+			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
+			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 2);
+			const tx = await sweetpadNFTFreezing.freezeBatch([1, 2], [182, 1097]);
+
+			const freezeBlock = await provider.getBlockNumber();
+			const blocksPerDay = await sweetpadNFTFreezing.BLOCKS_PER_DAY();
+			const freezeEndBlock1 = blocksPerDay.mul(182).add(freezeBlock);
+			const freezeEndBlock2 = blocksPerDay.mul(1097).add(freezeBlock);
+
+			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
+			expect(await sweetpadNFT.ownerOf(2)).to.equal(sweetpadNFTFreezing.address);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock1]);
+			expect(await sweetpadNFTFreezing.nftData(2)).to.eql([caller.address, freezeEndBlock2]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(2)]);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 1, freezeEndBlock1, 5);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 2, freezeEndBlock2, 24);
 		});
 	});
 

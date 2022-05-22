@@ -30,21 +30,28 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
      * @param freezePeriod: freezing period in days
      */
     function freeze(uint128 nftId, uint128 freezePeriod) external override {
-        require(nft.ownerOf(nftId) == msg.sender, "SweetpadNFTFreezing: NFT not belong to user");
-        require(freezePeriod >= 182, "SweetpadNFTFreezing: Freeze period must be greater than 182 days");
+        _freeze(nftId, freezePeriod);
+    }
 
-        nft.safeTransferFrom(msg.sender, address(this), nftId);
+    /**
+     * @notice Freeze Sweetpad NFTs
+     * @param nftIds: the ids of the NFT
+     * @param freezePeriods: freezing periods in days
+     */
+    function freezeBatch(uint128[] calldata nftIds, uint128[] calldata freezePeriods) external override {
+        require(nftIds.length == freezePeriods.length, "SweetpadNFTFreezing: Array lengths is not equal");
+        
+        uint256 len = nftIds.length;
+        for (uint256 i = 0; i < len; i++) {
+            _freeze(nftIds[i], freezePeriods[i]);
+        }
+    }
 
-        NFTData storage _nftData = nftData[nftId];
-        _nftData.freezer = msg.sender;
-        _nftData.freezeEndBlock = freezePeriod * BLOCKS_PER_DAY + block.number;
-
-        userNFTs[msg.sender].push(nftId);
-
-        uint256 ticketsToMint = freezePeriod >= 1095 ? getTicketsCountForNFT(nftId) * 2 : getTicketsCountForNFT(nftId);
-        ticket.mint(msg.sender, ticketsToMint);
-
-        emit Frozen(msg.sender, nftId, _nftData.freezeEndBlock, ticketsToMint);
+    /**
+     * @notice Returnс NFTs froze by the user
+     */
+    function getNftsFrozeByUser(address user) external view override returns (uint256[] memory) {
+        return userNFTs[user];
     }
 
     function setSweetpadNFT(address _nft) public override onlyOwner {
@@ -65,10 +72,20 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         return nft.tierToBoost(nft.idToTier(nftId));
     }
 
-    /**
-     * @notice Returnс NFTs froze by the user
-     */
-    function getNftsFrozeByUser(address user) external view override returns (uint256[] memory) {
-        return userNFTs[user];
+    function _freeze(uint128 nftId, uint128 freezePeriod) private {
+        require(freezePeriod >= 182, "SweetpadNFTFreezing: Freeze period must be greater than 182 days");
+
+        nft.safeTransferFrom(msg.sender, address(this), nftId);
+
+        NFTData storage _nftData = nftData[nftId];
+        _nftData.freezer = msg.sender;
+        _nftData.freezeEndBlock = freezePeriod * BLOCKS_PER_DAY + block.number;
+
+        userNFTs[msg.sender].push(nftId);
+
+        uint256 ticketsToMint = freezePeriod >= 1095 ? getTicketsCountForNFT(nftId) * 2 : getTicketsCountForNFT(nftId);
+        ticket.mint(msg.sender, ticketsToMint);
+
+        emit Frozen(msg.sender, nftId, _nftData.freezeEndBlock, ticketsToMint);
     }
 }
