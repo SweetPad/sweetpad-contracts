@@ -10,12 +10,12 @@ import "./interfaces/ISweetpadTicket.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
-    uint256 public constant override BLOCKS_PER_DAY = 28674;
+    uint256 private constant BLOCKS_PER_DAY = 28674;
     ISweetpadNFT public override nft;
     ISweetpadTicket public override ticket;
 
     /// @notice NFT id -> frozen NFT data
-    mapping(uint256 => NFTData) public nftData;
+    mapping(uint256 => NFTData) public override nftData;
     /// @notice user address -> NFT id's freezed by user
     mapping(address => uint256[]) public userNFTs;
 
@@ -54,14 +54,18 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         return userNFTs[user];
     }
 
-    function setSweetpadNFT(address _nft) public override onlyOwner {
-        require(_nft != address(0), "SweetpadNFTFreezing: NFT contract address can't be 0");
-        nft = ISweetpadNFT(_nft);
+    function setSweetpadNFT(address newNft) public override onlyOwner {
+        require(newNft != address(0), "SweetpadNFTFreezing: NFT contract address can't be 0");
+        nft = ISweetpadNFT(newNft);
     }
 
-    function setSweetpadTicket(address _ticket) public override onlyOwner {
-        require(_ticket != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
-        ticket = ISweetpadTicket(_ticket);
+    function setSweetpadTicket(address newTicket) external override onlyOwner {
+        require(newTicket != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
+        ticket = ISweetpadTicket(newTicket);
+    }
+
+    function blocksPerDay() external pure override returns (uint256) {
+        return BLOCKS_PER_DAY;
     }
 
     /**
@@ -75,8 +79,6 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     function _freeze(uint128 nftId, uint128 freezePeriod) private {
         require(freezePeriod >= 182, "SweetpadNFTFreezing: Freeze period must be greater than 182 days");
 
-        nft.safeTransferFrom(msg.sender, address(this), nftId);
-
         NFTData storage _nftData = nftData[nftId];
         _nftData.freezer = msg.sender;
         _nftData.freezeEndBlock = freezePeriod * BLOCKS_PER_DAY + block.number;
@@ -85,6 +87,8 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         uint256 ticketsToMint = freezePeriod >= 1095 ? getTicketsCountForNFT(nftId) * 2 : getTicketsCountForNFT(nftId);
         ticket.mint(msg.sender, ticketsToMint);
+
+        nft.safeTransferFrom(msg.sender, address(this), nftId);
 
         emit Frozen(msg.sender, nftId, _nftData.freezeEndBlock, ticketsToMint);
     }

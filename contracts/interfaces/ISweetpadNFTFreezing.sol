@@ -16,11 +16,13 @@ interface ISweetpadNFTFreezing {
 
     function freezeBatch(uint128[] calldata, uint128[] calldata) external;
 
-    function BLOCKS_PER_DAY() external view returns (uint256);
+    function blocksPerDay() external pure returns (uint256);
 
     function nft() external view returns (ISweetpadNFT);
 
     function ticket() external view returns (ISweetpadTicket);
+
+    function nftData(uint256) external view returns (address, uint256);
 
     function getNftsFrozeByUser(address) external view returns (uint256[] memory);
 

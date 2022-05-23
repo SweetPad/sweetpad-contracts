@@ -35,7 +35,7 @@ describe("SweetpadNFTFreezing", function () {
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
 			expect(await sweetpadNFTFreezing.nft()).to.equal(sweetpadNFT.address);
-			expect(await sweetpadNFTFreezing.BLOCKS_PER_DAY()).to.equal(28674);
+			expect(await sweetpadNFTFreezing.blocksPerDay()).to.equal(28674);
 		});
 	});
 
@@ -57,7 +57,7 @@ describe("SweetpadNFTFreezing", function () {
 			const tx = await sweetpadNFTFreezing.freeze(1, 182);
 
 			const freezeBlock = await provider.getBlockNumber();
-			const blocksPerDay = await sweetpadNFTFreezing.BLOCKS_PER_DAY();
+			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
 			const freezeEndBlock = blocksPerDay.mul(182).add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
@@ -71,7 +71,7 @@ describe("SweetpadNFTFreezing", function () {
 			const tx = await sweetpadNFTFreezing.freeze(1, 1095);
 
 			const freezeBlock = await provider.getBlockNumber();
-			const blocksPerDay = await sweetpadNFTFreezing.BLOCKS_PER_DAY();
+			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
 			const freezeEndBlock = blocksPerDay.mul(1095).add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
@@ -106,7 +106,7 @@ describe("SweetpadNFTFreezing", function () {
 			const tx = await sweetpadNFTFreezing.freezeBatch([1, 2], [182, 1097]);
 
 			const freezeBlock = await provider.getBlockNumber();
-			const blocksPerDay = await sweetpadNFTFreezing.BLOCKS_PER_DAY();
+			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
 			const freezeEndBlock1 = blocksPerDay.mul(182).add(freezeBlock);
 			const freezeEndBlock2 = blocksPerDay.mul(1097).add(freezeBlock);
 
