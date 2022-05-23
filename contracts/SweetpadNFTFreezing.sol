@@ -12,7 +12,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
     ISweetpadNFT public override nft;
 
     /// @notice NFT id -> frozen NFT data
-    mapping(uint256 => NFTData) public nftData;
+    mapping(uint256 => NFTData) public override nftData;
 
     constructor(address _nft) {
         setSweetpadNFT(_nft);
