@@ -40,7 +40,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
      */
     function freezeBatch(uint128[] calldata nftIds, uint128[] calldata freezePeriods) external override {
         require(nftIds.length == freezePeriods.length, "SweetpadNFTFreezing: Array lengths is not equal");
-        
+
         uint256 len = nftIds.length;
         for (uint256 i = 0; i < len; i++) {
             _freeze(nftIds[i], freezePeriods[i]);
