@@ -8,7 +8,7 @@ import "./interfaces/ISweetpadNFT.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
     /// @notice Blocks per day for BSC
-    uint256 public constant override BLOCKS_PER_DAY = 28674;
+    uint256 private constant override BLOCKS_PER_DAY = 28674;
     ISweetpadNFT public override nft;
 
     /// @notice NFT id -> frozen NFT data
@@ -18,16 +18,20 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
         setSweetpadNFT(_nft);
     }
 
+    function blocksPerDay() external view returns (uint256) {
+        return BLOCKS_PER_DAY;
+    }
+
     /**
      * @notice Return the tickets count for SweetpadNFT
      * @param nftId NFT ID for which you need to get the number of tickets
      */
-    function getTicketsCountForNFT(uint256 nftId) public view override returns (uint256) {
+    function getTicketsCountForNFT(uint256 nftId) external view override returns (uint256) {
         return nft.tierToBoost(nft.idToTier(nftId));
     }
 
-    function setSweetpadNFT(address _nft) public override onlyOwner {
-        require(_nft != address(0), "SweetpadNFTFreezing: NFT contract address can't be 0");
-        nft = ISweetpadNFT(_nft);
+    function setSweetpadNFT(address newNFT) public override onlyOwner {
+        require(newNFT != address(0), "SweetpadNFTFreezing: NFT contract address can't be 0");
+        nft = ISweetpadNFT(newNFT);
     }
 }

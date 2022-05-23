@@ -11,7 +11,7 @@ interface ISweetpadNFTFreezing {
         uint256 freezeEndBlock;
     }
 
-    function BLOCKS_PER_DAY() external view returns (uint256);
+    function blocksPerDay() external view returns (uint256);
 
     function nft() external view returns (ISweetpadNFT);
 
