@@ -8,7 +8,7 @@ import "./interfaces/ISweetpadNFT.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
     /// @notice Blocks per day for BSC
-    uint256 private constant override BLOCKS_PER_DAY = 28674;
+    uint256 private constant BLOCKS_PER_DAY = 28674;
     ISweetpadNFT public override nft;
 
     /// @notice NFT id -> frozen NFT data
@@ -18,7 +18,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable {
         setSweetpadNFT(_nft);
     }
 
-    function blocksPerDay() external view returns (uint256) {
+    function blocksPerDay() external pure override returns (uint256) {
         return BLOCKS_PER_DAY;
     }
 

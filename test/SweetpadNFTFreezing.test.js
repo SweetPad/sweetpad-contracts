@@ -30,7 +30,7 @@ describe("SweetpadNFTFreezing", function () {
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
 			expect(await sweetpadNFTFreezing.nft()).to.equal(sweetpadNFT.address);
-			expect(await sweetpadNFTFreezing.BLOCKS_PER_DAY()).to.equal(28674);
+			expect(await sweetpadNFTFreezing.blocksPerDay()).to.equal(28674);
 		});
 	});
 
