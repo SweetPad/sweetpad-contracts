@@ -33,6 +33,13 @@ describe("SweetpadFreezing", function () {
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
 			expect(await sweetpadFreezing.sweetToken()).to.equal(sweetToken.address);
+			expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(10);
+			expect(await sweetpadFreezing.getMinFreezePeriod()).to.equal(
+				(await sweetpadFreezing.getBlocksPerDay()).mul(182)
+			);
+			expect(await sweetpadFreezing.getMaxFreezePeriod()).to.equal(
+				(await sweetpadFreezing.getBlocksPerDay()).mul(1095)
+			);
 		});
 	});
 
@@ -57,7 +64,7 @@ describe("SweetpadFreezing", function () {
 			const swtBalance = await sweetToken.balanceOf(deployer.address);
 			let stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 1820);
 			let lockedPeriod = BigNumber.from(stakeTX.blockNumber).add(
-				BigNumber.from(182).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
+				BigNumber.from(182).mul(await sweetpadFreezing.getBlocksPerDay())
 			);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(parseEther("10000"));
 			expect(await sweetpadFreezing.freezeInfo(deployer.address, 0)).to.eql([
@@ -70,7 +77,7 @@ describe("SweetpadFreezing", function () {
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
 			stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 10950);
 			lockedPeriod = BigNumber.from(stakeTX.blockNumber).add(
-				BigNumber.from(1095).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
+				BigNumber.from(1095).mul(await sweetpadFreezing.getBlocksPerDay())
 			);
 
 			expect((await sweetpadFreezing.getFreezes(deployer.address)).length).to.equal(2);

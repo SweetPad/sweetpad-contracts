@@ -15,7 +15,7 @@ import "./interfaces/ISweetpadFreezing.sol";
 contract SweetpadFreezing is ISweetpadFreezing {
     using SafeERC20 for IERC20;
 
-    uint256 public constant BLOCKS_PER_DAY = 10;
+    uint256 private constant BLOCKS_PER_DAY = 10;
     // Min period counted with blocks that user can freeze assets
     uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;
     // Max period counted with blocks that user can freeze assets
@@ -27,7 +27,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
     /// @dev The data for each account, returns totalPower
     mapping(address => uint256) public override totalPower;
 
-    IERC20 public sweetToken;
+    IERC20 public override sweetToken;
 
     /**
      * @notice Initialize contract
@@ -66,6 +66,18 @@ contract SweetpadFreezing is ISweetpadFreezing {
 
     function getFreezes(address account_) external view override returns (FreezeInfo[] memory) {
         return freezeInfo[account_];
+    }
+
+    function getBlocksPerDay() external view override returns (uint256) {
+        return BLOCKS_PER_DAY;
+    }
+
+    function getMinFreezePeriod() external view override returns (uint256) {
+        return MIN_FREEZE_PERIOD;
+    }
+
+    function getMaxFreezePeriod() external view override returns (uint256) {
+        return MAX_FREEZE_PERIOD;
     }
 
     function getPower(uint256 amount_, uint256 period_) public pure override returns (uint256 power) {
