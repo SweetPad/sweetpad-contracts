@@ -4,82 +4,108 @@ pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "./interfaces/ISweetpadFreezing.sol";
 
-contract SweetpadFreezing {
+/**
+ * @title SweetpadFreezing
+ * @dev Contract module which provides functionality to freeze assets on contract and get allocation.
+ */
+
+contract SweetpadFreezing is ISweetpadFreezing {
     using SafeERC20 for IERC20;
 
     uint256 public constant BLOCKS_PER_DAY = 10;
+    // Min period counted with blocks that user can freeze assets
+    uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;
+    // Max period counted with blocks that user can freeze assets
+    uint256 private constant MAX_FREEZE_PERIOD = 1095 * BLOCKS_PER_DAY;
 
-    struct FreezeInfo {
-        uint256 frozenUntil;
-        uint256 period;
-        uint256 frozenAmount;
-        uint256 power;
-    }
+    /// @dev The data for each account
+    mapping(address => FreezeInfo[]) public override freezeInfo;
 
-    mapping(address => FreezeInfo[]) public stakes;
-
-    mapping(address => uint256) public totalPower;
+    /// @dev The data for each account, returns totalPower
+    mapping(address => uint256) public override totalPower;
 
     IERC20 public sweetToken;
 
+    /**
+     * @notice Initialize contract
+     */
     constructor(IERC20 sweetToken_) {
         require(address(sweetToken_) != address(0), "SweetpadFreezing: Token address cant be Zero address");
         sweetToken = sweetToken_;
     }
 
-    function freezeSWT(uint256 amount_, uint256 period_) external {
-        require(sweetToken.balanceOf(msg.sender) >= amount_, "SweetpadFreezing: Insufficient tokens");
-        require(182 <= period_ && period_ <= 1095, "SweetpadFreezing: Wrong period");
-        require(getPower(amount_, period_) >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        stakes[msg.sender].push(
-            FreezeInfo({
-                frozenUntil: block.number + period_ * BLOCKS_PER_DAY,
-                period: period_,
-                frozenAmount: amount_,
-                power: getPower(amount_, period_)
-            })
-        );
-        totalPower[msg.sender] += getPower(amount_, period_);
-        sweetToken.safeTransferFrom(msg.sender, address(this), amount_);
+    /**
+     * @notice Freeze SWT tokens
+     * @param amount_ Amount of tokens to freeze
+     * @param period_ Period of freezing
+     */
+    function freezeSWT(uint256 amount_, uint256 period_) external override {
+        uint256 power = getPower(amount_, period_);
+        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
+        _freezeSWT(msg.sender, amount_, period_, power);
     }
 
-    function unfreezeSWT(uint256 id, uint256 amount_) external {
-        require(
-            (getStakes(msg.sender)).length >= 1 && (getStakes(msg.sender)).length > id,
-            "SweetpadFreezing: Wrong id"
-        );
-        require(stakes[msg.sender][id].frozenAmount != 0, "SweetpadFreezing: Staked amount is Zero");
-        require(
-            getPower(stakes[msg.sender][id].frozenAmount - amount_, stakes[msg.sender][id].period) >= 10000 ether ||
-                getPower(stakes[msg.sender][id].frozenAmount - amount_, stakes[msg.sender][id].period) == 0,
-            "SweetpadFreezing: At least 10.000 xSWT is required"
-        );
-        require(block.number >= stakes[msg.sender][id].frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
-        totalPower[msg.sender] -= getPower(amount_, stakes[msg.sender][id].period);
-        stakes[msg.sender][id].power -= getPower(amount_, stakes[msg.sender][id].period);
-        stakes[msg.sender][id].frozenAmount -= amount_;
-        sweetToken.safeTransfer(msg.sender, amount_);
+    /**
+     * @notice Freeze SWT tokens
+     * @param id_ Id of freezing
+     * @param amount_ Amount of tokens to unfreeze
+     */
+    function unfreezeSWT(uint256 id_, uint256 amount_) external override {
+        FreezeInfo storage freezeData = freezeInfo[msg.sender][id_];
+        require(freezeData.frozenAmount != 0, "SweetpadFreezing: Staked amount is Zero");
+        require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient staked amount");
+        uint256 powerDelta = getPower(freezeData.frozenAmount - amount_, freezeData.period);
+        uint256 power = getPower(amount_, freezeData.period);
+        require(powerDelta >= 10000 ether || powerDelta == 0, "SweetpadFreezing: At least 10.000 xSWT is required");
+        require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
+        _unfreezeSWT(msg.sender, id_, amount_, power);
     }
 
-    function getStakes(address staker_) public view returns (FreezeInfo[] memory) {
-        return stakes[staker_];
+    function getStakes(address account_) public view override returns (FreezeInfo[] memory) {
+        return freezeInfo[account_];
     }
 
-    function getPower(uint256 amount_, uint256 period_) public pure returns (uint256 power) {
-        if (period_ == 182) {
+    function getPower(uint256 amount_, uint256 period_) public pure override returns (uint256 power) {
+        require(MIN_FREEZE_PERIOD <= period_ && period_ <= MAX_FREEZE_PERIOD, "SweetpadFreezing: Wrong period");
+        if (period_ == MIN_FREEZE_PERIOD) {
             power = amount_ / 2;
             return power;
         }
 
-        if (period_ > 182 && period_ <= 365) {
-            power = (period_ * amount_) / 365;
+        if (period_ > MIN_FREEZE_PERIOD && period_ <= 365 * BLOCKS_PER_DAY) {
+            power = (period_ * amount_) / 365 / BLOCKS_PER_DAY;
             return power;
         }
 
-        if (period_ > 365 && period_ <= 1095) {
-            power = ((period_ - 365 + 730) * amount_) / 730;
-            return power;
-        }
+        power = ((period_ + 365 * BLOCKS_PER_DAY) * amount_) / 730 / BLOCKS_PER_DAY;
+        return power;
+    }
+
+    function _freezeSWT(
+        address account_,
+        uint256 amount_,
+        uint256 period_,
+        uint256 power_
+    ) private {
+        freezeInfo[account_].push(
+            FreezeInfo({frozenUntil: block.number + period_, period: period_, frozenAmount: amount_, power: power_})
+        );
+        totalPower[account_] += power_;
+        sweetToken.safeTransferFrom(account_, address(this), amount_);
+    }
+
+    function _unfreezeSWT(
+        address account_,
+        uint256 id_,
+        uint256 amount_,
+        uint256 power_
+    ) private {
+        totalPower[account_] -= power_;
+        freezeInfo[account_][id_].power -= power_;
+        freezeInfo[account_][id_].frozenAmount -= amount_;
+        sweetToken.safeTransfer(account_, amount_);
     }
 }

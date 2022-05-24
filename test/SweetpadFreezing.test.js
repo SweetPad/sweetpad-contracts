@@ -38,21 +38,16 @@ describe("SweetpadFreezing", function () {
 
 	describe("FreezeSWT function", function () {
 		it("Should revert with 'SweetpadFreezing: Wrong period'", async function () {
-			await expect(sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), 181)).to.be.revertedWith(
+			await expect(sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), 1810)).to.be.revertedWith(
 				"SweetpadFreezing: Wrong period"
 			);
-			await expect(sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), 1100)).to.be.revertedWith(
+			await expect(sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), 11000)).to.be.revertedWith(
 				"SweetpadFreezing: Wrong period"
-			);
-		});
-		it("Should revert with 'SweetpadFreezing: Insufficient tokens'", async function () {
-			await expect(sweetpadFreezing.connect(caller).freezeSWT(parseEther("20000"), 182)).to.be.revertedWith(
-				"SweetpadFreezing: Insufficient tokens"
 			);
 		});
 
 		it("Should revert with 'SweetpadFreezing: At least 10.000 xSWT is required'", async function () {
-			await expect(sweetpadFreezing.connect(caller).freezeSWT(parseEther("15000"), 182)).to.be.revertedWith(
+			await expect(sweetpadFreezing.connect(caller).freezeSWT(parseEther("15000"), 1820)).to.be.revertedWith(
 				"SweetpadFreezing: At least 10.000 xSWT is required"
 			);
 		});
@@ -60,33 +55,33 @@ describe("SweetpadFreezing", function () {
 		it("Should stake with min period, than stake again", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
 			const swtBalance = await sweetToken.balanceOf(deployer.address);
-			let stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 182);
+			let stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 1820);
 			let lockedPeriod = BigNumber.from(stakeTX.blockNumber).add(
 				BigNumber.from(182).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
 			);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(parseEther("10000"));
-			expect(await sweetpadFreezing.stakes(deployer.address, 0)).to.eql([
+			expect(await sweetpadFreezing.freezeInfo(deployer.address, 0)).to.eql([
 				BigNumber.from(lockedPeriod),
-				BigNumber.from("182"),
+				BigNumber.from("1820"),
 				parseEther("20000"),
 				parseEther("10000")
 			]);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("20000")));
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
-			stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 365);
+			stakeTX = await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), 10950);
 			lockedPeriod = BigNumber.from(stakeTX.blockNumber).add(
-				BigNumber.from(365).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
+				BigNumber.from(1095).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
 			);
 
 			expect((await sweetpadFreezing.getStakes(deployer.address)).length).to.equal(2);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
-				BigNumber.from(totalPower).add(parseEther("20000"))
+				BigNumber.from(totalPower).add(parseEther("40000"))
 			);
-			expect(await sweetpadFreezing.stakes(deployer.address, 1)).to.eql([
+			expect(await sweetpadFreezing.freezeInfo(deployer.address, 1)).to.eql([
 				BigNumber.from(lockedPeriod),
-				BigNumber.from("365"),
+				BigNumber.from("10950"),
 				parseEther("20000"),
-				parseEther("20000")
+				parseEther("40000")
 			]);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("40000")));
 		});
@@ -95,35 +90,39 @@ describe("SweetpadFreezing", function () {
 	describe("UnfreezeSWT function", function () {
 		it("Should revert with 'SweetpadFreezing: At least 10.000 xSWT is required'", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
 			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("30000"))).to.be.revertedWith(
 				"SweetpadFreezing: At least 10.000 xSWT is required"
 			);
 		});
 
-		it("Should revert with 'SweetpadFreezing: Wrong id'", async function () {
+		it("Should revert with 'SweetpadFreezing: Staked amount is Zero'", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
-			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(1, parseEther("30000"))).to.be.revertedWith(
-				"SweetpadFreezing: Wrong id"
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
+
+			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
+
+			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"));
+			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"))).to.be.revertedWith(
+				"SweetpadFreezing: Staked amount is Zero"
 			);
 		});
 
-		it("Should revert with 'SweetpadFreezing: Staked amount is Zero'", async function () {
+		it("Should revert with 'SweetpadFreezing: Insufficient staked amount'", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
 
-			await timeAndMine.mine((await sweetpadFreezing.stakes(deployer.address, 0)).frozenUntil);
+			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
 
-			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"));
-			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("10000"))).to.be.revertedWith(
-				"SweetpadFreezing: Staked amount is Zero"
+			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("20000"));
+			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"))).to.be.revertedWith(
+				"SweetpadFreezing: Insufficient staked amount"
 			);
 		});
 
 		it("Should revert with 'SweetpadFreezing: Locked period dosn`t pass'", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
 
 			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("10000"))).to.be.revertedWith(
 				"SweetpadFreezing: Locked period dosn`t pass"
@@ -132,20 +131,20 @@ describe("SweetpadFreezing", function () {
 
 		it("Should unstake partial", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
-			const power = (await sweetpadFreezing.stakes(deployer.address, 0)).power;
+			const power = (await sweetpadFreezing.freezeInfo(deployer.address, 0)).power;
 
 			const swtBalance = await sweetToken.balanceOf(deployer.address);
 
-			await timeAndMine.mine((await sweetpadFreezing.stakes(deployer.address, 0)).frozenUntil);
+			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
 
 			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("10000"));
-			const lostPower = await sweetpadFreezing.getPower(parseEther("10000"), 182);
+			const lostPower = await sweetpadFreezing.getPower(parseEther("10000"), 1820);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
 				BigNumber.from(totalPower).sub(lostPower)
 			);
-			expect((await sweetpadFreezing.stakes(deployer.address, 0)).power).to.equal(
+			expect((await sweetpadFreezing.freezeInfo(deployer.address, 0)).power).to.equal(
 				BigNumber.from(power).sub(lostPower)
 			);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.add(parseEther("10000")));
@@ -153,16 +152,16 @@ describe("SweetpadFreezing", function () {
 
 		it("Should unstake fully", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 182);
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), 1820);
 
 			const swtBalance = await sweetToken.balanceOf(deployer.address);
 
-			await timeAndMine.mine((await sweetpadFreezing.stakes(deployer.address, 0)).frozenUntil);
+			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
 
 			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"));
 
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(constants.Zero);
-			expect((await sweetpadFreezing.stakes(deployer.address, 0)).power).to.equal(constants.Zero);
+			expect((await sweetpadFreezing.freezeInfo(deployer.address, 0)).power).to.equal(constants.Zero);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.add(parseEther("40000")));
 		});
 	});

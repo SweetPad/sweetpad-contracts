@@ -9,6 +9,18 @@ interface ISweetpadFreezing {
         uint256 power;
     }
 
+    function freezeInfo(address, uint256)
+        external
+        view
+        returns (
+            uint256,
+            uint256,
+            uint256,
+            uint256
+        );
+
+    function totalPower(address) external view returns (uint256);
+
     function freezeSWT(uint256, uint256) external;
 
     function unfreezeSWT(uint256, uint256) external;
