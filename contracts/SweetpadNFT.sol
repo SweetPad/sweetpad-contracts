@@ -75,6 +75,24 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     }
 
     /**
+     * @notice Transfer tokens from 'from' to 'to'
+     * @param from_ The address of the tokens owner
+     * @param to_ The address of the tokens receiver
+     * @param ids_ Array of token ids
+     * @param data_ The _data argument MAY be re-purposed for the new context.
+     */
+    function safeBatchTransferFrom(
+        address from_,
+        address to_,
+        uint256[] memory ids_,
+        bytes memory data_
+    ) external override {
+        for (uint256 i = 0; i < ids_.length; i++) {
+            safeTransferFrom(from_, to_, ids_[i], data_);
+        }
+    }
+
+    /**
      * @notice Mint new 721 standard token
      * @param tier_ tier
      */
