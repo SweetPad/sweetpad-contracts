@@ -23,6 +23,13 @@ interface ISweetpadNFT is IERC721, IERC721Metadata {
 
     function safeMintBatch(address, Tier[] memory) external;
 
+    function safeBatchTransferFrom(
+        address,
+        address,
+        uint256[] memory,
+        bytes memory
+    ) external;
+
     /// @notice Emitted when new NFT is minted
     event Create(uint256 indexed, Tier indexed, address indexed);
 }

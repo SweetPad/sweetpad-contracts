@@ -25,18 +25,20 @@ describe("SweetpadNFT", function () {
 	});
 
 	describe("setBaseURI function", function () {
-		it("Should revert if caller is't admin", async function() {
-			await expect(sweetpadNFT.connect(caller).setBaseURI("ipfs://")).to.be.revertedWith("Ownable: caller is not the owner");
+		it("Should revert if caller is't admin", async function () {
+			await expect(sweetpadNFT.connect(caller).setBaseURI("ipfs://")).to.be.revertedWith(
+				"Ownable: caller is not the owner"
+			);
 		});
 
-		it("Should update baseURI", async function() {
+		it("Should update baseURI", async function () {
 			await sweetpadNFT.setBaseURI("ipns://");
 			expect(await sweetpadNFT.tokenURI(0)).to.be.equal("ipns://");
 		});
 	});
 
-	describe("currentID", function() {
-		it("Should return last minted token ID", async function() {
+	describe("currentID", function () {
+		it("Should return last minted token ID", async function () {
 			expect(await sweetpadNFT.currentID()).to.equal(0);
 			await sweetpadNFT.safeMint(holder.address, 0);
 			expect(await sweetpadNFT.currentID()).to.equal(1);
@@ -63,14 +65,40 @@ describe("SweetpadNFT", function () {
 		});
 	});
 
-	describe("Mint function", function () {
-		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadNFT.connect(caller).safeMint(holder.address, 1)).to.be.revertedWith("Ownable: caller is not the owner");
+	describe("safeBatchTransferFrom", function () {
+		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
+			await sweetpadNFT.safeMint(holder.address, 0);
+			await sweetpadNFT.safeMint(holder.address, 1);
+
+			await expect(
+				sweetpadNFT.connect(caller).safeBatchTransferFrom(holder.address, owner.address, [1, 2], "0x00")
+			).to.revertedWith("ERC721: transfer caller is not owner nor approved");
 		});
 
+		it("Should safeBatchTransferFrom correctly", async function () {
+			await sweetpadNFT.safeMint(holder.address, 0);
+			await sweetpadNFT.safeMint(holder.address, 1);
+
+			await sweetpadNFT.connect(holder).setApprovalForAll(caller.address, true);
+
+			await sweetpadNFT.connect(caller).safeBatchTransferFrom(holder.address, owner.address, [1, 2], "0x00");
+
+			expect(await sweetpadNFT.ownerOf(1)).to.equal(owner.address);
+			expect(await sweetpadNFT.ownerOf(2)).to.equal(owner.address);
+		});
+	});
+
+	describe("Mint function", function () {
+		it("Should revert if caller is't admin", async function () {
+			await expect(sweetpadNFT.connect(caller).safeMint(holder.address, 1)).to.be.revertedWith(
+				"Ownable: caller is not the owner"
+			);
+		});
 
 		it("Should emit event Create", async function () {
-			await expect(sweetpadNFT.safeMint(holder.address, 1)).to.emit(sweetpadNFT, "Create").withArgs(1, 1, holder.address);
+			await expect(sweetpadNFT.safeMint(holder.address, 1))
+				.to.emit(sweetpadNFT, "Create")
+				.withArgs(1, 1, holder.address);
 		});
 
 		it("Should safeMint", async function () {
@@ -90,16 +118,16 @@ describe("SweetpadNFT", function () {
 
 	describe("MintBatch function", function () {
 		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadNFT.connect(caller).safeMintBatch(holder.address, [1, 1])).to.be.revertedWith("Ownable: caller is not the owner");
+			await expect(sweetpadNFT.connect(caller).safeMintBatch(holder.address, [1, 1])).to.be.revertedWith(
+				"Ownable: caller is not the owner"
+			);
 		});
 
 		it("Should emit event Create", async function () {
 			const tiers = [1, 1, 0, 2];
 			const tx = await sweetpadNFT.safeMintBatch(holder.address, tiers);
-			tiers.forEach(tier => {
-				expect(tx)
-					.to.emit(sweetpadNFT, "Create")
-					.withArgs(1, tier, holder.address);
+			tiers.forEach((tier) => {
+				expect(tx).to.emit(sweetpadNFT, "Create").withArgs(1, tier, holder.address);
 			});
 		});
 
@@ -108,8 +136,8 @@ describe("SweetpadNFT", function () {
 			await sweetpadNFT.safeMintBatch(holder.address, [1, 1, 0, 2]);
 
 			for await (const i of tiers.keys()) {
-				expect(await sweetpadNFT.ownerOf(i+1)).to.equal(holder.address);
-				expect(await sweetpadNFT.idToTier(i+1)).to.equal(tiers[i]);
+				expect(await sweetpadNFT.ownerOf(i + 1)).to.equal(holder.address);
+				expect(await sweetpadNFT.idToTier(i + 1)).to.equal(tiers[i]);
 			}
 		});
 	});
@@ -139,7 +167,7 @@ describe("SweetpadNFT", function () {
 			await sweetpadNFT.safeMintBatch(holder.address, tiers);
 
 			for (let i = 0; i < tiers.length; i++) {
-				expect(await sweetpadNFT.tokenURI(i + 1)).to.be.equal("ipfs://" + (i + 1) + ".json");	
+				expect(await sweetpadNFT.tokenURI(i + 1)).to.be.equal("ipfs://" + (i + 1) + ".json");
 			}
 		});
 	});
