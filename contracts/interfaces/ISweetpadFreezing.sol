@@ -25,7 +25,7 @@ interface ISweetpadFreezing {
 
     function unfreezeSWT(uint256, uint256) external;
 
-    function getStakes(address) external view returns (FreezeInfo[] memory);
+    function getFreezes(address) external view returns (FreezeInfo[] memory);
 
     function getPower(uint256, uint256) external pure returns (uint256);
 }

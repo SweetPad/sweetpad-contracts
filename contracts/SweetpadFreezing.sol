@@ -64,7 +64,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
         _unfreezeSWT(msg.sender, id_, amount_, power);
     }
 
-    function getStakes(address account_) public view override returns (FreezeInfo[] memory) {
+    function getFreezes(address account_) external view override returns (FreezeInfo[] memory) {
         return freezeInfo[account_];
     }
 

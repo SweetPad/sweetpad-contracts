@@ -73,7 +73,7 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(1095).mul(await sweetpadFreezing.BLOCKS_PER_DAY())
 			);
 
-			expect((await sweetpadFreezing.getStakes(deployer.address)).length).to.equal(2);
+			expect((await sweetpadFreezing.getFreezes(deployer.address)).length).to.equal(2);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
 				BigNumber.from(totalPower).add(parseEther("40000"))
 			);
