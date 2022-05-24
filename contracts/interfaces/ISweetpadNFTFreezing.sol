@@ -12,9 +12,9 @@ interface ISweetpadNFTFreezing {
         uint256 freezeEndBlock;
     }
 
-    function freeze(uint128, uint128) external;
+    function freeze(uint256, uint256) external;
 
-    function freezeBatch(uint128[] calldata, uint128[] calldata) external;
+    function freezeBatch(uint256[] calldata, uint256[] calldata) external;
 
     function blocksPerDay() external pure returns (uint256);
 

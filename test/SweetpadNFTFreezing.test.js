@@ -17,6 +17,7 @@ describe("SweetpadNFTFreezing", function () {
 		const sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing", caller);
 		const sweetpadTicket = await waffle.deployMockContract(deployer, sweetpadTicketJson.abi);
 		await sweetpadTicket.mock.mint.returns(true);
+		await sweetpadTicket.mock.mintBatch.returns(true);
 
 		await sweetpadNFT.safeMintBatch(caller.address, [0, 1, 2, 0]);
 		sweetpadNFTFreezing.connect(deployer).setSweetpadTicket(sweetpadTicket.address);
