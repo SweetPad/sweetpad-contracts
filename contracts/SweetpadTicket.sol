@@ -67,7 +67,7 @@ contract SweetpadTicket is ISweetpadTicket, ERC1155(""), Ownable {
         uint256,
         bytes memory
     ) public virtual override(ERC1155, IERC1155) {
-        require(false, "SweetpadTicket: can't transfer tickets");
+        revert("SweetpadTicket: can't transfer tickets");
     }
 
     function safeBatchTransferFrom(
@@ -77,6 +77,6 @@ contract SweetpadTicket is ISweetpadTicket, ERC1155(""), Ownable {
         uint256[] memory,
         bytes memory
     ) public virtual override(ERC1155, IERC1155) {
-        require(false, "SweetpadTicket: can't transfer tickets");
+        revert("SweetpadTicket: can't transfer tickets");
     }
 }
