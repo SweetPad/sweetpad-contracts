@@ -47,7 +47,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
     }
 
     /**
-     * @notice Freeze SWT tokens
+     * @notice Unfreeze SWT tokens
      * @param id_ Id of freezing
      * @param amount_ Amount of tokens to unfreeze
      */
@@ -104,8 +104,10 @@ contract SweetpadFreezing is ISweetpadFreezing {
             FreezeInfo({frozenUntil: block.number + period_, period: period_, frozenAmount: amount_, power: power_})
         );
         totalPower[account_] += power_;
-        sweetToken.safeTransferFrom(account_, address(this), amount_);
+
         emit Freeze(account_, amount_, power_);
+
+        sweetToken.safeTransferFrom(account_, address(this), amount_);
     }
 
     function _unfreezeSWT(
@@ -117,7 +119,9 @@ contract SweetpadFreezing is ISweetpadFreezing {
         totalPower[account_] -= power_;
         freezeInfo[account_][id_].power -= power_;
         freezeInfo[account_][id_].frozenAmount -= amount_;
-        sweetToken.safeTransfer(account_, amount_);
+
         emit UnFreeze(id_, account_, amount_);
+
+        sweetToken.safeTransfer(account_, amount_);
     }
 }
