@@ -37,4 +37,9 @@ interface ISweetpadFreezing {
     function getFreezes(address) external view returns (FreezeInfo[] memory);
 
     function getPower(uint256, uint256) external pure returns (uint256);
+
+    /// @notice Emitted when tokens are frozen
+    event Freeze(address indexed, uint256 indexed, uint256 indexed);
+    /// @notice Emitted when tokens are unFrozen
+    event UnFreeze(uint256 indexed, address indexed, uint256 indexed);
 }

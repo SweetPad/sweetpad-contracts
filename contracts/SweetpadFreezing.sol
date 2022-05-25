@@ -4,14 +4,12 @@ pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "./interfaces/ISweetpadFreezing.sol";
 
 /**
  * @title SweetpadFreezing
  * @dev Contract module which provides functionality to freeze assets on contract and get allocation.
  */
-
 contract SweetpadFreezing is ISweetpadFreezing {
     using SafeERC20 for IERC20;
 
@@ -54,9 +52,9 @@ contract SweetpadFreezing is ISweetpadFreezing {
      * @param amount_ Amount of tokens to unfreeze
      */
     function unfreezeSWT(uint256 id_, uint256 amount_) external override {
-        FreezeInfo storage freezeData = freezeInfo[msg.sender][id_];
-        require(freezeData.frozenAmount != 0, "SweetpadFreezing: Staked amount is Zero");
-        require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient staked amount");
+        FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
+        require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
+        require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient frozen amount");
         uint256 powerDelta = getPower(freezeData.frozenAmount - amount_, freezeData.period);
         uint256 power = getPower(amount_, freezeData.period);
         require(powerDelta >= 10000 ether || powerDelta == 0, "SweetpadFreezing: At least 10.000 xSWT is required");
@@ -107,6 +105,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
         );
         totalPower[account_] += power_;
         sweetToken.safeTransferFrom(account_, address(this), amount_);
+        emit Freeze(account_, amount_, power_);
     }
 
     function _unfreezeSWT(
@@ -119,5 +118,6 @@ contract SweetpadFreezing is ISweetpadFreezing {
         freezeInfo[account_][id_].power -= power_;
         freezeInfo[account_][id_].frozenAmount -= amount_;
         sweetToken.safeTransfer(account_, amount_);
+        emit UnFreeze(id_, account_, amount_);
     }
 }
