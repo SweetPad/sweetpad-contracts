@@ -96,29 +96,20 @@ describe("SweetpadNFTFreezing", function () {
 
 		it("Should freeze nfts in SweetpadNFTFreezing contract", async function () {
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
-			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 2);
-			const tx = await sweetpadNFTFreezing.freezeBatch([1, 2], [blocksPer182Days, blocksPer1095Days]);
+			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 3);
+			const tx = await sweetpadNFTFreezing.freezeBatch([1, 3], [blocksPer182Days, blocksPer1095Days]);
 
 			const freezeBlock = BigNumber.from(await provider.getBlockNumber());
 			const freezeEndBlock1 = blocksPer182Days.add(freezeBlock);
 			const freezeEndBlock2 = blocksPer1095Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFT.ownerOf(2)).to.equal(sweetpadNFTFreezing.address);
+			expect(await sweetpadNFT.ownerOf(3)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock1]);
-			expect(await sweetpadNFTFreezing.nftData(2)).to.eql([caller.address, freezeBlock, freezeEndBlock2]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(2)]);
+			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, freezeBlock, freezeEndBlock2]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock1, 5);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 2, freezeEndBlock2, 24);
-		});
-	});
-
-	describe("getTicketsCountForNFT: ", function () {
-		it("Should return correct value for every tier", async function () {
-			expect(await sweetpadNFTFreezing.getTicketsCountForNFT(1)).to.equal(5);
-			expect(await sweetpadNFTFreezing.getTicketsCountForNFT(2)).to.equal(12);
-			expect(await sweetpadNFTFreezing.getTicketsCountForNFT(3)).to.equal(30);
-			expect(await sweetpadNFTFreezing.getTicketsCountForNFT(4)).to.equal(5);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 3, freezeEndBlock2, 30);
 		});
 	});
 

@@ -33,7 +33,10 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
      * @param freezePeriod: freezing period in blocks
      */
     function freeze(uint256 nftId, uint256 freezePeriod) external override {
-        (uint256 ticketsToMint, uint256 freezeEndBlock) = _freeze(nftId, freezePeriod);
+        uint256 freezeEndBlock = _freeze(nftId, freezePeriod);
+        uint256 ticketsToMint = freezePeriod == MAX_PERIOD
+            ? nft.getTicketsQuantityById(nftId) * 2
+            : nft.getTicketsQuantityById(nftId);
 
         emit Froze(msg.sender, nftId, freezeEndBlock, ticketsToMint);
 
@@ -51,12 +54,12 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         uint256 len = nftIds.length;
         uint256[] memory ticketsToMintBatch = new uint256[](len);
+        ticketsToMintBatch = nft.getTicketsQuantityByIds(nftIds);
 
         for (uint256 i = 0; i < len; i++) {
-            (uint256 ticketsToMint, uint256 freezeEndBlock) = _freeze(nftIds[i], freezePeriods[i]);
-            ticketsToMintBatch[i] = ticketsToMint;
+            uint256 freezeEndBlock = _freeze(nftIds[i], freezePeriods[i]);
 
-            emit Froze(msg.sender, nftIds[i], freezeEndBlock, ticketsToMint);
+            emit Froze(msg.sender, nftIds[i], freezeEndBlock, ticketsToMintBatch[i]);
         }
 
         ticket.mintBatch(msg.sender, nftIds, ticketsToMintBatch);
@@ -92,21 +95,9 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         ticket = ISweetpadTicket(newTicket);
     }
 
-    /**
-     * @notice Return the tickets count for SweetpadNFT
-     * @param nftId NFT ID for which you need to get the number of tickets
-     */
-    function getTicketsCountForNFT(uint256 nftId) public view override returns (uint256) {
-        return nft.tierToBoost(nft.idToTier(nftId));
-    }
-
-    function _freeze(uint256 nftId, uint256 freezePeriod)
-        private
-        returns (uint256 ticketsToMint, uint256 freezeEndBlock)
-    {
+    function _freeze(uint256 nftId, uint256 freezePeriod) private returns (uint256 freezeEndBlock) {
         require(freezePeriod >= MIN_PERIOD && freezePeriod <= MAX_PERIOD, "SweetpadNFTFreezing: Wrong freeze period");
 
-        ticketsToMint = freezePeriod == MAX_PERIOD ? getTicketsCountForNFT(nftId) * 2 : getTicketsCountForNFT(nftId);
         freezeEndBlock = freezePeriod + block.number;
 
         nftData[nftId] = NFTData({freezer: msg.sender, freezeStartBlock: block.number, freezeEndBlock: freezeEndBlock});
