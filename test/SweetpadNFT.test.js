@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const {
-	ethers: { getContract, getNamedSigners },
+	ethers: { getContract, getNamedSigners, BigNumber },
 	deployments: { fixture }
 } = require("hardhat");
 
@@ -169,6 +169,21 @@ describe("SweetpadNFT", function () {
 			for (let i = 0; i < tiers.length; i++) {
 				expect(await sweetpadNFT.tokenURI(i + 1)).to.be.equal("ipfs://" + (i + 1) + ".json");
 			}
+		});
+	});
+
+	describe("getTicketsQuantityByIds function", function () {
+		it("Should return tickets quantity by ids", async function () {
+			const tiers = [1, 1, 0, 2];
+			await sweetpadNFT.safeMintBatch(holder.address, tiers);
+			const ticketsQuantity = await sweetpadNFT.getTicketsQuantityByIds([1, 2, 3, 4]);
+
+			expect(ticketsQuantity).to.eql([
+				BigNumber.from(12),
+				BigNumber.from(12),
+				BigNumber.from(5),
+				BigNumber.from(30)
+			]);
 		});
 	});
 });

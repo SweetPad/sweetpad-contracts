@@ -15,6 +15,8 @@ interface ISweetpadNFT is IERC721, IERC721Metadata {
 
     function tierToBoost(Tier) external view returns (uint256);
 
+    function getTicketsQuantityByIds(uint256[] calldata) external view returns (uint256[] calldata);
+
     function setBaseURI(string memory) external;
 
     function currentID() external view returns (uint256);
