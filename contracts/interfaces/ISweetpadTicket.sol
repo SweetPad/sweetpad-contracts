@@ -1,10 +1,34 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.7;
+pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 interface ISweetpadTicket is IERC1155 {
-    function mint(address, uint256) external returns (bool);
+    function totalTickets() external returns (uint256);
 
-    function mintBatch(address, uint256[] memory) external returns (bool);
+    function accountTickets(address) external returns (uint256);
+
+    function mint(
+        address to_,
+        uint256 id_,
+        uint256 amount_
+    ) external;
+
+    function burn(
+        address account,
+        uint256 id,
+        uint256 value
+    ) external;
+
+    function mintBatch(
+        address to_,
+        uint256[] memory ids_,
+        uint256[] memory amounts_
+    ) external;
+
+    function burnBatch(
+        address account,
+        uint256[] memory ids,
+        uint256[] memory values
+    ) external;
 }

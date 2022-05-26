@@ -34,7 +34,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         emit Frozen(msg.sender, nftId, freezeEndBlock, ticketsToMint);
 
-        ticket.mint(msg.sender, ticketsToMint);
+        ticket.mint(msg.sender, nftId, ticketsToMint);
         nft.safeTransferFrom(msg.sender, address(this), nftId);
     }
 
@@ -56,7 +56,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
             emit Frozen(msg.sender, nftIds[i], freezeEndBlock, ticketsToMint);
         }
 
-        ticket.mintBatch(msg.sender, ticketsToMintBatch);
+        ticket.mintBatch(msg.sender, nftIds, ticketsToMintBatch);
         nft.safeBatchTransferFrom(msg.sender, address(this), nftIds, "0x00");
     }
 
