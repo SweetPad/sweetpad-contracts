@@ -12,6 +12,7 @@ import "./interfaces/ISweetpadFreezing.sol";
  */
 contract SweetpadFreezing is ISweetpadFreezing {
     using SafeERC20 for IERC20;
+    uint16 private constant DAYS_IN_YEAR = 365;
     // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
     uint256 private constant BLOCKS_PER_DAY = 10;
     // Min period counted with blocks that user can freeze assets
@@ -55,11 +56,14 @@ contract SweetpadFreezing is ISweetpadFreezing {
         FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
         require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
         require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient frozen amount");
-        uint256 powerDelta = getPower(freezeData.frozenAmount - amount_, freezeData.period);
-        uint256 power = getPower(amount_, freezeData.period);
-        require(powerDelta >= 10000 ether || powerDelta == 0, "SweetpadFreezing: At least 10.000 xSWT is required");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
-        _unfreezeSWT(msg.sender, id_, amount_, power);
+        uint256 expectedPower = getPower(freezeData.frozenAmount - amount_, freezeData.period);
+        require(
+            expectedPower >= 10000 ether || expectedPower == 0,
+            "SweetpadFreezing: At least 10.000 xSWT is required"
+        );
+        uint256 powerDelta = getPower(amount_, freezeData.period);
+        _unfreezeSWT(msg.sender, id_, amount_, powerDelta);
     }
 
     function getFreezes(address account_) external view override returns (FreezeInfo[] memory) {
@@ -85,12 +89,12 @@ contract SweetpadFreezing is ISweetpadFreezing {
             return power;
         }
 
-        if (period_ > MIN_FREEZE_PERIOD && period_ <= 365 * BLOCKS_PER_DAY) {
-            power = (period_ * amount_) / 365 / BLOCKS_PER_DAY;
+        if (period_ > MIN_FREEZE_PERIOD && period_ <= DAYS_IN_YEAR * BLOCKS_PER_DAY) {
+            power = (period_ * amount_) / DAYS_IN_YEAR / BLOCKS_PER_DAY;
             return power;
         }
 
-        power = ((period_ + 365 * BLOCKS_PER_DAY) * amount_) / 730 / BLOCKS_PER_DAY;
+        power = ((period_ + DAYS_IN_YEAR * BLOCKS_PER_DAY) * amount_) / (DAYS_IN_YEAR * 2) / BLOCKS_PER_DAY;
         return power;
     }
 
@@ -101,11 +105,11 @@ contract SweetpadFreezing is ISweetpadFreezing {
         uint256 power_
     ) private {
         freezeInfo[account_].push(
-            FreezeInfo({frozenUntil: block.number + period_, period: period_, frozenAmount: amount_, power: power_})
+            FreezeInfo({frozenUntil: block.number + period_, period: period_, frozenAmount: amount_})
         );
         totalPower[account_] += power_;
 
-        emit Freeze(account_, amount_, power_);
+        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_);
 
         sweetToken.safeTransferFrom(account_, address(this), amount_);
     }
@@ -117,7 +121,6 @@ contract SweetpadFreezing is ISweetpadFreezing {
         uint256 power_
     ) private {
         totalPower[account_] -= power_;
-        freezeInfo[account_][id_].power -= power_;
         freezeInfo[account_][id_].frozenAmount -= amount_;
 
         emit UnFreeze(id_, account_, amount_);

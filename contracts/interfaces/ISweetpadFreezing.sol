@@ -7,14 +7,12 @@ interface ISweetpadFreezing {
         uint256 frozenUntil; // blockNumber when can be unfrozen
         uint256 period; // Number of blocks that tokens are frozen
         uint256 frozenAmount; // Amount of tokens are frozen
-        uint256 power; // power that account get
     }
 
     function freezeInfo(address, uint256)
         external
         view
         returns (
-            uint256,
             uint256,
             uint256,
             uint256
@@ -39,7 +37,7 @@ interface ISweetpadFreezing {
     function getPower(uint256, uint256) external pure returns (uint256);
 
     /// @notice Emitted when tokens are frozen
-    event Freeze(address indexed, uint256 indexed, uint256 indexed);
+    event Freeze(uint256, address indexed, uint256, uint256);
     /// @notice Emitted when tokens are unFrozen
-    event UnFreeze(uint256 indexed, address indexed, uint256 indexed);
+    event UnFreeze(uint256, address indexed, uint256);
 }

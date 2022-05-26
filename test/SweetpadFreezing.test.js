@@ -76,8 +76,7 @@ describe("SweetpadFreezing", function () {
 			expect(await sweetpadFreezing.freezeInfo(deployer.address, 0)).to.eql([
 				BigNumber.from(lockedPeriod),
 				BigNumber.from(await daysToBlocks(182)),
-				parseEther("20000"),
-				parseEther("10000")
+				parseEther("20000")
 			]);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("20000")));
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
@@ -93,8 +92,7 @@ describe("SweetpadFreezing", function () {
 			expect(await sweetpadFreezing.freezeInfo(deployer.address, 1)).to.eql([
 				BigNumber.from(lockedPeriod),
 				BigNumber.from(await daysToBlocks(1095)),
-				parseEther("20000"),
-				parseEther("40000")
+				parseEther("20000")
 			]);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("40000")));
 		});
@@ -103,7 +101,7 @@ describe("SweetpadFreezing", function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("20000"));
 			await expect(sweetpadFreezing.connect(deployer).freezeSWT(parseEther("20000"), await daysToBlocks(182)))
 				.to.emit(sweetpadFreezing, "Freeze")
-				.withArgs(deployer.address, parseEther("20000"), parseEther("10000"));
+				.withArgs((await sweetpadFreezing.getFreezes(deployer.address)).length - 1, deployer.address, parseEther("20000"), parseEther("10000"));
 		});
 	});
 
@@ -111,6 +109,9 @@ describe("SweetpadFreezing", function () {
 		it("Should revert with 'SweetpadFreezing: At least 10.000 xSWT is required'", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
 			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), await daysToBlocks(182));
+
+			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
+
 			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("30000"))).to.be.revertedWith(
 				"SweetpadFreezing: At least 10.000 xSWT is required"
 			);
@@ -153,7 +154,6 @@ describe("SweetpadFreezing", function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
 			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), await daysToBlocks(182));
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
-			const power = (await sweetpadFreezing.freezeInfo(deployer.address, 0)).power;
 
 			const swtBalance = await sweetToken.balanceOf(deployer.address);
 
@@ -163,9 +163,6 @@ describe("SweetpadFreezing", function () {
 			const lostPower = await sweetpadFreezing.getPower(parseEther("10000"), await daysToBlocks(182));
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
 				BigNumber.from(totalPower).sub(lostPower)
-			);
-			expect((await sweetpadFreezing.freezeInfo(deployer.address, 0)).power).to.equal(
-				BigNumber.from(power).sub(lostPower)
 			);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.add(parseEther("10000")));
 		});
@@ -181,7 +178,6 @@ describe("SweetpadFreezing", function () {
 			await sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("40000"));
 
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(constants.Zero);
-			expect((await sweetpadFreezing.freezeInfo(deployer.address, 0)).power).to.equal(constants.Zero);
 			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.add(parseEther("40000")));
 		});
 
