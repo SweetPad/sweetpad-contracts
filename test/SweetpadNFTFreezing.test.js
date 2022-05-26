@@ -1,10 +1,8 @@
 const { expect } = require("chai");
 const {
 	ethers: { getContract, getNamedSigners, constants, provider, BigNumber },
-	deployments: { fixture, createFixture },
-	waffle
+	deployments: { fixture, createFixture }
 } = require("hardhat");
-const sweetpadTicketJson = require("../artifacts/contracts/interfaces/ISweetpadTicket.sol/ISweetpadTicket.json");
 
 describe("SweetpadNFTFreezing", function () {
 	let deployer, caller;
@@ -14,11 +12,10 @@ describe("SweetpadNFTFreezing", function () {
 		await fixture(["", "dev"]);
 
 		const sweetpadNFT = await getContract("SweetpadNFT");
+		const sweetpadTicket = await getContract("SweetpadTicket");
 		const sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing", caller);
-		const sweetpadTicket = await waffle.deployMockContract(deployer, sweetpadTicketJson.abi);
-		await sweetpadTicket.mock.mint.returns(true);
-		await sweetpadTicket.mock.mintBatch.returns(true);
 
+		await sweetpadTicket.transferOwnership(sweetpadNFTFreezing.address);
 		await sweetpadNFT.safeMintBatch(caller.address, [0, 1, 2, 0]);
 		sweetpadNFTFreezing.connect(deployer).setSweetpadTicket(sweetpadTicket.address);
 
@@ -64,7 +61,7 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 1, freezeEndBlock, 5);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 5);
 		});
 
 		it("Should freeze nft in SweetpadNFTFreezing contract (1095 days)", async function () {
@@ -78,7 +75,7 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 1, freezeEndBlock, 10);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 10);
 		});
 	});
 
@@ -116,8 +113,8 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock1]);
 			expect(await sweetpadNFTFreezing.nftData(2)).to.eql([caller.address, freezeBlock, freezeEndBlock2]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(2)]);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 1, freezeEndBlock1, 5);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Frozen").withArgs(caller.address, 2, freezeEndBlock2, 24);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock1, 5);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 2, freezeEndBlock2, 24);
 		});
 	});
 

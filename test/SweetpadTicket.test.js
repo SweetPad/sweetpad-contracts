@@ -131,7 +131,7 @@ describe("SweetpadTickets", function () {
 
 	describe("safeTransferFrom", function () {
 		it("Should revert, functions was suspend", async function () {
-			await expect(sweetpadTicket.connect(caller).safeTransferFrom(AddressZero, AddressZero, 0, 0)).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).safeTransferFrom(AddressZero, AddressZero, 0, 0, "0x00")).to.be.revertedWith(
 				"SweetpadTicket: can't transfer tickets"
 			);
 		});
@@ -139,7 +139,7 @@ describe("SweetpadTickets", function () {
 
 	describe("safeBatchTransferFrom", function () {
 		it("Should revert, functions was suspend", async function () {
-			await expect(sweetpadTicket.connect(caller).safeBatchTransferFrom(AddressZero, AddressZero, [0], [0])).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).safeBatchTransferFrom(AddressZero, AddressZero, [0], [0], "0x00")).to.be.revertedWith(
 				"SweetpadTicket: can't batch transfer tickets"
 			);
 		});

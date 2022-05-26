@@ -41,5 +41,5 @@ interface ISweetpadNFTFreezing {
 
     function getTicketsCountForNFT(uint256) external view returns (uint256);
 
-    event Frozen(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
+    event Froze(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
 }

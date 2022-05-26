@@ -19,9 +19,9 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice user address -> NFT id's freezed by user
     mapping(address => uint256[]) public userNFTs;
 
-    constructor(address _nft) {
+    constructor(address _nft, address _ticket) {
         setSweetpadNFT(_nft);
-        // TODO add setSweetpadTicket function call after full ticket contract creation
+        setSweetpadTicket(_ticket);
     }
 
     /**
@@ -32,7 +32,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     function freeze(uint256 nftId, uint256 freezePeriod) external override {
         (uint256 ticketsToMint, uint256 freezeEndBlock) = _freeze(nftId, freezePeriod);
 
-        emit Frozen(msg.sender, nftId, freezeEndBlock, ticketsToMint);
+        emit Froze(msg.sender, nftId, freezeEndBlock, ticketsToMint);
 
         ticket.mint(msg.sender, nftId, ticketsToMint);
         nft.safeTransferFrom(msg.sender, address(this), nftId);
@@ -53,7 +53,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
             (uint256 ticketsToMint, uint256 freezeEndBlock) = _freeze(nftIds[i], freezePeriods[i]);
             ticketsToMintBatch[i] = ticketsToMint;
 
-            emit Frozen(msg.sender, nftIds[i], freezeEndBlock, ticketsToMint);
+            emit Froze(msg.sender, nftIds[i], freezeEndBlock, ticketsToMint);
         }
 
         ticket.mintBatch(msg.sender, nftIds, ticketsToMintBatch);
@@ -72,7 +72,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nft = ISweetpadNFT(newNft);
     }
 
-    function setSweetpadTicket(address newTicket) external override onlyOwner {
+    function setSweetpadTicket(address newTicket) public override onlyOwner {
         require(newTicket != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
         ticket = ISweetpadTicket(newTicket);
     }
