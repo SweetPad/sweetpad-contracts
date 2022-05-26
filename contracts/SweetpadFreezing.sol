@@ -12,7 +12,7 @@ import "./interfaces/ISweetpadFreezing.sol";
  */
 contract SweetpadFreezing is ISweetpadFreezing {
     using SafeERC20 for IERC20;
-
+    // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
     uint256 private constant BLOCKS_PER_DAY = 10;
     // Min period counted with blocks that user can freeze assets
     uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;

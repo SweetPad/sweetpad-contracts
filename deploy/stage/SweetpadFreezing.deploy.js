@@ -1,16 +1,16 @@
 module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, getContract } }) => {
 	const { deployer } = await getNamedSigners();
 	const sweetToken = await getContract("SweetpadToken");
-	await deploy("Staking", {
+	await deploy("SweetpadFreezing", {
 		from: deployer.address,
-		contract: "Staking",
+		contract: "SweetpadFreezing",
 		args: [sweetToken.address],
 		log: true
 	});
 
-	const staking = await getContract("Staking");
+	const sweetpadFreezing = await getContract("SweetpadFreezing");
 
-	return staking;
+	return sweetpadFreezing;
 };
-module.exports.tags = ["Staking", "prod"];
+module.exports.tags = ["SweetpadFreezing", "stage"];
 module.exports.dependencies = ["SweetpadToken"];
