@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
@@ -42,6 +42,19 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
 
     function currentID() external view override returns (uint256) {
         return idCounter.current();
+    }
+
+    /*
+        @notice Function to get tickets quantity by tokens ids.
+        @param ids_ Array of token ids
+        @return ticketsQuantity Array of tickets quantity
+    */
+    function getTicketsQuantityByIds(uint256[] calldata ids_) external view override returns (uint256[] memory) {
+        uint256[] memory ticketsQuantity = new uint256[](ids_.length);
+        for (uint256 i = 0; i < ids_.length; i++) {
+            ticketsQuantity[i] = tierToBoost[idToTier[ids_[i]]];
+        }
+        return ticketsQuantity;
     }
 
     /**
