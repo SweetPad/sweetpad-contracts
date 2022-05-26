@@ -7,6 +7,10 @@ const {
 describe("SweetpadNFTFreezing", function () {
 	let deployer, caller;
 	let sweetpadNFT, sweetpadTicket, sweetpadNFTFreezing;
+	
+	const blocksPerDay = BigNumber.from(28674);
+	const blocksPer182Days = blocksPerDay.mul(182);
+	const blocksPer1095Days = blocksPerDay.mul(1095);
 
 	const setupFixture = createFixture(async () => {
 		await fixture(["", "dev"]);
@@ -33,30 +37,35 @@ describe("SweetpadNFTFreezing", function () {
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
 			expect(await sweetpadNFTFreezing.nft()).to.equal(sweetpadNFT.address);
-			expect(await sweetpadNFTFreezing.blocksPerDay()).to.equal(28674);
+			expect(await sweetpadNFTFreezing.blocksPerDay()).to.equal(blocksPerDay);
+			expect(await sweetpadNFTFreezing.minFreezePeriod()).to.equal(blocksPer182Days);
+			expect(await sweetpadNFTFreezing.maxFreezePeriod()).to.equal(blocksPer1095Days);
 		});
 	});
 
 	describe("freeze: ", function () {
 		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
-			await expect(sweetpadNFTFreezing.connect(deployer).freeze(1, 182)).to.revertedWith(
+			await expect(sweetpadNFTFreezing.connect(deployer).freeze(1, blocksPer182Days)).to.revertedWith(
 				"ERC721: transfer caller is not owner nor approved"
 			);
 		});
 
-		it("Should revert with 'SweetpadNFTFreezing: Freeze period must be greater than 182 days'", async function () {
-			await expect(sweetpadNFTFreezing.freeze(1, 181)).to.revertedWith(
-				"SweetpadNFTFreezing: Freeze period must be greater than 182 days"
+		it("Should revert with 'SweetpadNFTFreezing: Wrong freeze period'", async function () {
+			await expect(sweetpadNFTFreezing.freeze(1, blocksPer182Days.sub(blocksPerDay))).to.revertedWith(
+				"SweetpadNFTFreezing: Wrong freeze period"
+			);
+
+			await expect(sweetpadNFTFreezing.freeze(1, blocksPer1095Days.add(blocksPerDay))).to.revertedWith(
+				"SweetpadNFTFreezing: Wrong freeze period"
 			);
 		});
 
 		it("Should freeze nft in SweetpadNFTFreezing contract (182 days)", async function () {
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
-			const tx = await sweetpadNFTFreezing.freeze(1, 182);
+			const tx = await sweetpadNFTFreezing.freeze(1, blocksPer182Days);
 
 			const freezeBlock = BigNumber.from(await provider.getBlockNumber());
-			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
-			const freezeEndBlock = blocksPerDay.mul(182).add(freezeBlock);
+			const freezeEndBlock = blocksPer182Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
@@ -66,11 +75,10 @@ describe("SweetpadNFTFreezing", function () {
 
 		it("Should freeze nft in SweetpadNFTFreezing contract (1095 days)", async function () {
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
-			const tx = await sweetpadNFTFreezing.freeze(1, 1095);
+			const tx = await sweetpadNFTFreezing.freeze(1, blocksPer1095Days);
 
 			const freezeBlock = BigNumber.from(await provider.getBlockNumber());
-			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
-			const freezeEndBlock = blocksPerDay.mul(1095).add(freezeBlock);
+			const freezeEndBlock = blocksPer1095Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
@@ -80,33 +88,20 @@ describe("SweetpadNFTFreezing", function () {
 	});
 
 	describe("freezeBatch: ", function () {
-		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
-			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2], [182, 182])).to.revertedWith(
-				"ERC721: transfer caller is not owner nor approved"
-			);
-		});
-
 		it("Should revert with 'SweetpadNFTFreezing: Array lengths is not equal'", async function () {
-			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [182, 182])).to.revertedWith(
+			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [blocksPer182Days, blocksPer182Days])).to.revertedWith(
 				"SweetpadNFTFreezing: Array lengths is not equal"
-			);
-		});
-
-		it("Should revert with 'SweetpadNFTFreezing: Freeze period must be greater than 182 days'", async function () {
-			await expect(sweetpadNFTFreezing.freezeBatch([1, 2], [181, 182])).to.revertedWith(
-				"SweetpadNFTFreezing: Freeze period must be greater than 182 days"
 			);
 		});
 
 		it("Should freeze nfts in SweetpadNFTFreezing contract", async function () {
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 2);
-			const tx = await sweetpadNFTFreezing.freezeBatch([1, 2], [182, 1097]);
+			const tx = await sweetpadNFTFreezing.freezeBatch([1, 2], [blocksPer182Days, blocksPer1095Days]);
 
 			const freezeBlock = BigNumber.from(await provider.getBlockNumber());
-			const blocksPerDay = await sweetpadNFTFreezing.blocksPerDay();
-			const freezeEndBlock1 = blocksPerDay.mul(182).add(freezeBlock);
-			const freezeEndBlock2 = blocksPerDay.mul(1097).add(freezeBlock);
+			const freezeEndBlock1 = blocksPer182Days.add(freezeBlock);
+			const freezeEndBlock2 = blocksPer1095Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFT.ownerOf(2)).to.equal(sweetpadNFTFreezing.address);
@@ -132,11 +127,11 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([]);
 			
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 2);
-			await sweetpadNFTFreezing.freeze(2, 1095);
+			await sweetpadNFTFreezing.freeze(2, blocksPer1095Days);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(2)]);
 
 			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
-			await sweetpadNFTFreezing.freeze(1, 1095);
+			await sweetpadNFTFreezing.freeze(1, blocksPer1095Days);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(2), BigNumber.from(1)]);
 		});
 	});

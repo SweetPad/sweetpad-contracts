@@ -20,6 +20,10 @@ interface ISweetpadNFTFreezing {
 
     function blocksPerDay() external pure returns (uint256);
 
+    function minFreezePeriod() external pure returns (uint256);
+
+    function maxFreezePeriod() external pure returns (uint256);
+
     function nft() external view returns (ISweetpadNFT);
 
     function ticket() external view returns (ISweetpadTicket);
