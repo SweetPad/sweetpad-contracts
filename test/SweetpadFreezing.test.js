@@ -67,7 +67,6 @@ describe("SweetpadFreezing", function () {
 
 		it("Should freeze with min period, then freeze again", async function () {
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			const swtBalance = await sweetToken.balanceOf(deployer.address);
 			let freezeTX = await sweetpadFreezing
 				.connect(deployer)
 				.freezeSWT(parseEther("20000"), await daysToBlocks(182));
@@ -78,7 +77,6 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(182)),
 				parseEther("20000")
 			]);
-			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("20000")));
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
 			freezeTX = await sweetpadFreezing
 				.connect(deployer)
@@ -94,7 +92,18 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(1095)),
 				parseEther("20000")
 			]);
-			expect(await sweetToken.balanceOf(deployer.address)).to.equal(swtBalance.sub(parseEther("40000")));
+		});
+
+		it("Should transfer SWT correctly", async function () {
+			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
+			const period = await daysToBlocks(182);
+			await expect(() =>
+				sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), period)
+			).to.changeTokenBalances(
+				sweetToken,
+				[deployer, sweetpadFreezing],
+				[parseEther("40000").mul(constants.NegativeOne), parseEther("40000")]
+			);
 		});
 
 		it("Should emit Freeze event with correct args", async function () {
