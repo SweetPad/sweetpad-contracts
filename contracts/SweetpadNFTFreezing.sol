@@ -67,28 +67,27 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     }
 
     function unfreeze(uint256 nftId) external override {
-        NFTData memory _nftData = nftData[nftId];
-        require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
-        require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
+        _unfreeze(nftId);
 
-        delete nftData[nftId];
-
-        uint256[] storage _userNFTs = userNFTs[msg.sender];
-        uint256 len = _userNFTs.length;
-        for (uint256 i = 0; i < len; i++) {
-            if (_userNFTs[i] == nftId) {
-                if (i != len - 1) {
-                    _userNFTs[i] = _userNFTs[len - 1];
-                }
-                _userNFTs.pop();
-            }
-        }
         uint256 ticketsToBurn = nft.getTicketsQuantityById(nftId);
 
         emit Unfroze(msg.sender, nftId, ticketsToBurn);
 
         ticket.burn(msg.sender, nftId, ticketsToBurn);
         nft.safeTransferFrom(address(this), msg.sender, nftId);
+    }
+
+    function unfreezeBatch(uint256[] calldata nftIds) external override {
+        uint256[] memory ticketsToBurn = nft.getTicketsQuantityByIds(nftIds);
+
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            _unfreeze(nftIds[i]);
+
+            emit Unfroze(msg.sender, nftIds[i], ticketsToBurn[i]);
+        }
+
+        ticket.burnBatch(msg.sender, nftIds, ticketsToBurn);
+        nft.safeBatchTransferFrom(address(this), msg.sender, nftIds, "");
     }
 
     /**
@@ -128,5 +127,24 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nftData[nftId] = NFTData({freezer: msg.sender, freezePeriod: freezePeriod, freezeEndBlock: freezeEndBlock});
 
         userNFTs[msg.sender].push(nftId);
+    }
+
+    function _unfreeze(uint256 nftId) private {
+        NFTData memory _nftData = nftData[nftId];
+        require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
+        require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
+
+        delete nftData[nftId];
+
+        uint256[] storage _userNFTs = userNFTs[msg.sender];
+        uint256 len = _userNFTs.length;
+        for (uint256 i = 0; i < len; i++) {
+            if (_userNFTs[i] == nftId) {
+                if (i != len - 1) {
+                    _userNFTs[i] = _userNFTs[len - 1];
+                }
+                _userNFTs.pop();
+            }
+        }
     }
 }

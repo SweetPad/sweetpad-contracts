@@ -20,6 +20,8 @@ interface ISweetpadNFTFreezing {
 
     function unfreeze(uint256) external;
 
+    function unfreezeBatch(uint256[] calldata) external;
+
     function blocksPerDay() external pure returns (uint256);
 
     function minFreezePeriod() external pure returns (uint256);
