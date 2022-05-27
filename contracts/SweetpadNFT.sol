@@ -44,11 +44,20 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
         return idCounter.current();
     }
 
-    /*
-        @notice Function to get tickets quantity by tokens ids.
-        @param ids_ Array of token ids
-        @return ticketsQuantity Array of tickets quantity
-    */
+    /**
+     * @notice Function to get tickets quantity by tokens id.
+     * @param id_ Token id
+     * @return ticketsQuantity Tickets quantity
+     */
+    function getTicketsQuantityById(uint256 id_) external view override returns (uint256) {
+        return tierToBoost[idToTier[id_]];
+    }
+
+    /**
+     * @notice Function to get tickets quantity by tokens ids.
+     * @param ids_ Array of token ids
+     * @return ticketsQuantity Array of tickets quantity
+     */
     function getTicketsQuantityByIds(uint256[] calldata ids_) external view override returns (uint256[] memory) {
         uint256[] memory ticketsQuantity = new uint256[](ids_.length);
         for (uint256 i = 0; i < ids_.length; i++) {

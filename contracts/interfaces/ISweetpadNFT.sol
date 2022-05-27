@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity ^0.8.7;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol";
@@ -14,6 +14,8 @@ interface ISweetpadNFT is IERC721, IERC721Metadata {
     function idToTier(uint256) external view returns (Tier);
 
     function tierToBoost(Tier) external view returns (uint256);
+
+    function getTicketsQuantityById(uint256) external view returns (uint256);
 
     function getTicketsQuantityByIds(uint256[] calldata) external view returns (uint256[] calldata);
 

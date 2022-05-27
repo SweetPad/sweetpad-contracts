@@ -172,6 +172,18 @@ describe("SweetpadNFT", function () {
 		});
 	});
 
+	describe("getTicketsQuantityById function", function () {
+		it("Should return tickets quantity by id", async function () {
+			const tiers = [0, 2];
+			await sweetpadNFT.safeMintBatch(holder.address, tiers);
+			const ticketsQuantity1 = await sweetpadNFT.getTicketsQuantityById(1);
+			const ticketsQuantity2 = await sweetpadNFT.getTicketsQuantityById(2);
+
+			expect(ticketsQuantity1).to.eq(BigNumber.from(5));
+			expect(ticketsQuantity2).to.eq(BigNumber.from(30));
+		});
+	});
+
 	describe("getTicketsQuantityByIds function", function () {
 		it("Should return tickets quantity by ids", async function () {
 			const tiers = [1, 1, 0, 2];
