@@ -66,6 +66,31 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nft.safeBatchTransferFrom(msg.sender, address(this), nftIds, "0x00");
     }
 
+    function unfreeze(uint256 nftId) external override {
+        NFTData memory _nftData = nftData[nftId];
+        require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
+        require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
+
+        delete nftData[nftId];
+
+        uint256[] storage _userNFTs = userNFTs[msg.sender];
+        uint256 len = _userNFTs.length;
+        for (uint256 i = 0; i < len; i++) {
+            if (_userNFTs[i] == nftId) {
+                if (i != len - 1) {
+                    _userNFTs[i] = _userNFTs[len - 1];
+                }
+                _userNFTs.pop();
+            }
+        }
+        uint256 ticketsToBurn = nft.getTicketsQuantityById(nftId);
+
+        emit Unfroze(msg.sender, nftId, ticketsToBurn);
+
+        ticket.burn(msg.sender, nftId, ticketsToBurn);
+        nft.safeTransferFrom(address(this), msg.sender, nftId);
+    }
+
     /**
      * @notice Returnс NFTs froze by the user
      */
