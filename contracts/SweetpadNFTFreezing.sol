@@ -100,7 +100,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         freezeEndBlock = freezePeriod + block.number;
 
-        nftData[nftId] = NFTData({freezer: msg.sender, freezeStartBlock: block.number, freezeEndBlock: freezeEndBlock});
+        nftData[nftId] = NFTData({freezer: msg.sender, freezePeriod: freezePeriod, freezeEndBlock: freezeEndBlock});
 
         userNFTs[msg.sender].push(nftId);
     }

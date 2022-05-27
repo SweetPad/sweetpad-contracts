@@ -8,8 +8,8 @@ interface ISweetpadNFTFreezing {
     struct NFTData {
         // Account that froze NFT
         address freezer;
-        // block in which user has frozen NFT
-        uint256 freezeStartBlock;
+        // freeze period
+        uint256 freezePeriod;
         // block after which freezer can unfreeze NFT
         uint256 freezeEndBlock;
     }

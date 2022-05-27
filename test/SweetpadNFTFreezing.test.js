@@ -21,7 +21,6 @@ describe("SweetpadNFTFreezing", function () {
 
 		await sweetpadTicket.transferOwnership(sweetpadNFTFreezing.address);
 		await sweetpadNFT.safeMintBatch(caller.address, [0, 1, 2, 0]);
-		sweetpadNFTFreezing.connect(deployer).setSweetpadTicket(sweetpadTicket.address);
 
 		return [sweetpadNFT, sweetpadTicket, sweetpadNFTFreezing];
 	});
@@ -37,6 +36,7 @@ describe("SweetpadNFTFreezing", function () {
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
 			expect(await sweetpadNFTFreezing.nft()).to.equal(sweetpadNFT.address);
+			expect(await sweetpadNFTFreezing.ticket()).to.equal(sweetpadTicket.address);
 			expect(await sweetpadNFTFreezing.blocksPerDay()).to.equal(blocksPerDay);
 			expect(await sweetpadNFTFreezing.minFreezePeriod()).to.equal(blocksPer182Days);
 			expect(await sweetpadNFTFreezing.maxFreezePeriod()).to.equal(blocksPer1095Days);
@@ -44,12 +44,6 @@ describe("SweetpadNFTFreezing", function () {
 	});
 
 	describe("freeze: ", function () {
-		it("Should revert with 'ERC721: transfer caller is not owner nor approved'", async function () {
-			await expect(sweetpadNFTFreezing.connect(deployer).freeze(1, blocksPer182Days)).to.revertedWith(
-				"ERC721: transfer caller is not owner nor approved"
-			);
-		});
-
 		it("Should revert with 'SweetpadNFTFreezing: Wrong freeze period'", async function () {
 			await expect(sweetpadNFTFreezing.freeze(1, blocksPer182Days.sub(blocksPerDay))).to.revertedWith(
 				"SweetpadNFTFreezing: Wrong freeze period"
@@ -68,9 +62,10 @@ describe("SweetpadNFTFreezing", function () {
 			const freezeEndBlock = blocksPer182Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer182Days, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 5);
+			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
 		});
 
 		it("Should freeze nft in SweetpadNFTFreezing contract (1095 days)", async function () {
@@ -81,9 +76,10 @@ describe("SweetpadNFTFreezing", function () {
 			const freezeEndBlock = blocksPer1095Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer1095Days, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 10);
+			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
 		});
 	});
 
@@ -105,11 +101,12 @@ describe("SweetpadNFTFreezing", function () {
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFT.ownerOf(3)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeBlock, freezeEndBlock1]);
-			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, freezeBlock, freezeEndBlock2]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer182Days, freezeEndBlock1]);
+			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, blocksPer1095Days, freezeEndBlock2]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock1, 5);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 3, freezeEndBlock2, 30);
+			await expect(tx).to.emit(sweetpadTicket, "TransferBatch");
 		});
 	});
 
