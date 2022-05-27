@@ -29,7 +29,7 @@ describe("SweetpadToken", function () {
 
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
-			expect(await sweetpadToken.totalSupply()).to.equal(parseEther("1000000"));
+			expect(await sweetpadToken.totalSupply()).to.equal(parseEther("100000000"));
 			expect(await sweetpadToken.name()).to.equal("Sweetpad Token");
 			expect(await sweetpadToken.symbol()).to.equal("SWT");
 			expect(await sweetpadToken.decimals()).to.equal(18);
