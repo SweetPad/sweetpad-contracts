@@ -62,7 +62,7 @@ describe("SweetpadNFTFreezing", function () {
 			const freezeEndBlock = blocksPer182Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer182Days, freezeEndBlock]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 5);
 			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
@@ -76,7 +76,7 @@ describe("SweetpadNFTFreezing", function () {
 			const freezeEndBlock = blocksPer1095Days.add(freezeBlock);
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer1095Days, freezeEndBlock]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 10);
 			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
@@ -101,11 +101,11 @@ describe("SweetpadNFTFreezing", function () {
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFT.ownerOf(3)).to.equal(sweetpadNFTFreezing.address);
-			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, blocksPer182Days, freezeEndBlock1]);
-			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, blocksPer1095Days, freezeEndBlock2]);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock1]);
+			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, freezeEndBlock2]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock1, 5);
-			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 3, freezeEndBlock2, 30);
+
+			await expect(tx).to.emit(sweetpadNFTFreezing, "FrozeBatch").withArgs(caller.address, [1, 3], [freezeEndBlock1, freezeEndBlock2], [5, 60]);
 			await expect(tx).to.emit(sweetpadTicket, "TransferBatch");
 		});
 	});
