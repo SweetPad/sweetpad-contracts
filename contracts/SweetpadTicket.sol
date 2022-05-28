@@ -13,19 +13,17 @@ contract SweetpadTicket is ISweetpadTicket, ERC1155(""), Ownable {
     function mint(
         address to_,
         uint256 id_,
-        uint256 amount_,
-        bytes memory data_
+        uint256 amount_
     ) external override onlyOwner {
         totalTickets += amount_;
         accountTickets[to_] += amount_;
-        _mint(to_, id_, amount_, data_);
+        _mint(to_, id_, amount_, "0x00");
     }
 
     function mintBatch(
         address to_,
         uint256[] memory ids_,
-        uint256[] memory amounts_,
-        bytes memory data_
+        uint256[] memory amounts_
     ) external override onlyOwner {
         uint256 mintedTickets = 0;
         for (uint256 i = 0; i < amounts_.length; i++) {
@@ -33,7 +31,7 @@ contract SweetpadTicket is ISweetpadTicket, ERC1155(""), Ownable {
         }
         totalTickets += mintedTickets;
         accountTickets[to_] += mintedTickets;
-        _mintBatch(to_, ids_, amounts_, data_);
+        _mintBatch(to_, ids_, amounts_, "0x00");
     }
 
     function burn(address account_, uint256 id_) external override onlyOwner {

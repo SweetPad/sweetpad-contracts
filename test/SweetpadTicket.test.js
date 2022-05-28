@@ -37,16 +37,15 @@ describe("SweetpadTickets", function () {
 
 	describe("Mint", function () {
 		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadTicket.connect(caller).mint(holder.address, 1, 10, "0x00")).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).mint(holder.address, 1, 10)).to.be.revertedWith(
 				"Ownable: caller is not the owner"
 			);
 		});
 
 		it("Should mint given amount of tokens to given account", async function () {
-			await sweetpadTicket.mint(holder.address, 1, 5, "0x00");
-			await sweetpadTicket.mint(holder.address, 2, 10, "0x00");
-			await sweetpadTicket.mint(caller.address, 3, 20, "0x00");
-
+			await sweetpadTicket.mint(holder.address, 1, 5);
+			await sweetpadTicket.mint(holder.address, 2, 10);
+			await sweetpadTicket.mint(caller.address, 3, 20);
 
 			expect(await sweetpadTicket.balanceOf(holder.address, 1)).to.be.equal(5);
 			expect(await sweetpadTicket.balanceOf(holder.address, 2)).to.be.equal(10);
@@ -59,14 +58,14 @@ describe("SweetpadTickets", function () {
 
 	describe("MintBatch", function () {
 		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadTicket.connect(caller).mintBatch(holder.address, [1, 2], [5, 10], "0x00")).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).mintBatch(holder.address, [1, 2], [5, 10])).to.be.revertedWith(
 				"Ownable: caller is not the owner"
 			);
 		});
 
 		it("Should mint batch given amount of tokens to given account", async function () {
-			await sweetpadTicket.mintBatch(holder.address, [1, 2], [5, 10], "0x00");
-			await sweetpadTicket.mintBatch(caller.address, [3], [20], "0x00");
+			await sweetpadTicket.mintBatch(holder.address, [1, 2], [5, 10]);
+			await sweetpadTicket.mintBatch(caller.address, [3], [20]);
 
 			expect(await sweetpadTicket.balanceOf(holder.address, 1)).to.be.equal(5);
 			expect(await sweetpadTicket.balanceOf(holder.address, 2)).to.be.equal(10);
@@ -79,9 +78,9 @@ describe("SweetpadTickets", function () {
 
 	describe("Burn function: ", function () {
 		beforeEach(async function () {
-			await sweetpadTicket.mint(holder.address, 1, 5, "0x00");
-			await sweetpadTicket.mint(holder.address, 2, 10, "0x00");
-			await sweetpadTicket.mint(caller.address, 3, 20, "0x00");
+			await sweetpadTicket.mint(holder.address, 1, 5);
+			await sweetpadTicket.mint(holder.address, 2, 10);
+			await sweetpadTicket.mint(caller.address, 3, 20);
 		});
 
 		it("Should revert if caller is't admin", async function () {
@@ -107,8 +106,8 @@ describe("SweetpadTickets", function () {
 
 	describe("BurnBatch", function () {
 		beforeEach(async function () {
-			await sweetpadTicket.mintBatch(holder.address, [1, 2], [5, 10], "0x00");
-			await sweetpadTicket.mintBatch(caller.address, [3], [20], "0x00");
+			await sweetpadTicket.mintBatch(holder.address, [1, 2], [5, 10]);
+			await sweetpadTicket.mintBatch(caller.address, [3], [20]);
 		});
 
 		it("Should revert if caller is't admin", async function () {
