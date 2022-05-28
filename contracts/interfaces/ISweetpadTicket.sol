@@ -14,11 +14,7 @@ interface ISweetpadTicket is IERC1155 {
         uint256 amount_
     ) external;
 
-    function burn(
-        address account,
-        uint256 id,
-        uint256 value
-    ) external;
+    function burn(address account, uint256 id) external;
 
     function mintBatch(
         address to_,
@@ -26,9 +22,5 @@ interface ISweetpadTicket is IERC1155 {
         uint256[] memory amounts_
     ) external;
 
-    function burnBatch(
-        address account,
-        uint256[] memory ids,
-        uint256[] memory values
-    ) external;
+    function burnBatch(address account, uint256[] memory ids) external;
 }

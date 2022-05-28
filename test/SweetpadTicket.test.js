@@ -84,15 +84,15 @@ describe("SweetpadTickets", function () {
 		});
 
 		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadTicket.connect(caller).burn(holder.address, 1, 3)).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).burn(holder.address, 1)).to.be.revertedWith(
 				"Ownable: caller is not the owner"
 			);
 		});
 
 		it("Should burn given amount of tokens to given account", async function () {
-			await sweetpadTicket.burn(holder.address, 1, 5);
-			await sweetpadTicket.burn(holder.address, 2, 10);
-			await sweetpadTicket.burn(caller.address, 3, 20);
+			await sweetpadTicket.burn(holder.address, 1);
+			await sweetpadTicket.burn(holder.address, 2);
+			await sweetpadTicket.burn(caller.address, 3);
 
 
 			expect(await sweetpadTicket.balanceOf(holder.address, 1)).to.be.equal(0);
@@ -111,14 +111,14 @@ describe("SweetpadTickets", function () {
 		});
 
 		it("Should revert if caller is't admin", async function () {
-			await expect(sweetpadTicket.connect(caller).burnBatch(holder.address, [1, 2], [5, 10])).to.be.revertedWith(
+			await expect(sweetpadTicket.connect(caller).burnBatch(holder.address, [1, 2])).to.be.revertedWith(
 				"Ownable: caller is not the owner"
 			);
 		});
 
 		it("Should mint batch given amount of tokens to given account", async function () {
-			sweetpadTicket.burnBatch(holder.address, [1, 2], [5, 10]);
-			sweetpadTicket.burnBatch(caller.address, [3], [20]);
+			sweetpadTicket.burnBatch(holder.address, [1, 2]);
+			sweetpadTicket.burnBatch(caller.address, [3]);
 
 			expect(await sweetpadTicket.balanceOf(holder.address, 1)).to.be.equal(0);
 			expect(await sweetpadTicket.balanceOf(holder.address, 2)).to.be.equal(0);
