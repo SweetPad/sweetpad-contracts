@@ -42,5 +42,7 @@ interface ISweetpadNFTFreezing {
 
     event FrozeBatch(address indexed user, uint256[] nftIds, uint256[] freezeEndBlocks, uint256[] ticketsMinted);
 
-    event Unfroze(address indexed user, uint256 nftId, uint256 ticketsBurned);
+    event Unfroze(address indexed user, uint256 nftId);
+
+    event UnfrozeBatch(address indexed user, uint256[] nftId);
 }
