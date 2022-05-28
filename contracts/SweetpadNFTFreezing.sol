@@ -54,13 +54,17 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         uint256 len = nftIds.length;
         uint256[] memory ticketsToMintBatch = new uint256[](len);
+        uint256[] memory freezeEndBlocks = new uint256[](len);
         ticketsToMintBatch = nft.getTicketsQuantityByIds(nftIds);
 
         for (uint256 i = 0; i < len; i++) {
-            uint256 freezeEndBlock = _freeze(nftIds[i], freezePeriods[i]);
+            freezeEndBlocks[i] = _freeze(nftIds[i], freezePeriods[i]);
 
-            emit Froze(msg.sender, nftIds[i], freezeEndBlock, ticketsToMintBatch[i]);
+            if (freezePeriods[i] == MAX_PERIOD) {
+                ticketsToMintBatch[i] = ticketsToMintBatch[i] * 2;
+            }
         }
+        emit FrozeBatch(msg.sender, nftIds, freezeEndBlocks, ticketsToMintBatch);
 
         ticket.mintBatch(msg.sender, nftIds, ticketsToMintBatch);
         nft.safeBatchTransferFrom(msg.sender, address(this), nftIds, "0x00");
@@ -124,7 +128,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         freezeEndBlock = freezePeriod + block.number;
 
-        nftData[nftId] = NFTData({freezer: msg.sender, freezePeriod: freezePeriod, freezeEndBlock: freezeEndBlock});
+        nftData[nftId] = NFTData({freezer: msg.sender, freezeEndBlock: freezeEndBlock});
 
         userNFTs[msg.sender].push(nftId);
     }

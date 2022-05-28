@@ -8,8 +8,6 @@ interface ISweetpadNFTFreezing {
     struct NFTData {
         // Account that froze NFT
         address freezer;
-        // freeze period
-        uint256 freezePeriod;
         // block after which freezer can unfreeze NFT
         uint256 freezeEndBlock;
     }
@@ -32,14 +30,7 @@ interface ISweetpadNFTFreezing {
 
     function ticket() external view returns (ISweetpadTicket);
 
-    function nftData(uint256)
-        external
-        view
-        returns (
-            address,
-            uint256,
-            uint256
-        );
+    function nftData(uint256) external view returns (address, uint256);
 
     function getNftsFrozeByUser(address) external view returns (uint256[] memory);
 
@@ -48,6 +39,8 @@ interface ISweetpadNFTFreezing {
     function setSweetpadTicket(address) external;
 
     event Froze(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
+
+    event FrozeBatch(address indexed user, uint256[] nftIds, uint256[] freezeEndBlocks, uint256[] ticketsMinted);
 
     event Unfroze(address indexed user, uint256 nftId, uint256 ticketsBurned);
 }
