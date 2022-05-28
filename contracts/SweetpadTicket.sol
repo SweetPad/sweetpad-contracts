@@ -36,28 +36,23 @@ contract SweetpadTicket is ISweetpadTicket, ERC1155(""), Ownable {
         _mintBatch(to_, ids_, amounts_, data_);
     }
 
-    function burn(
-        address account_,
-        uint256 id_,
-        uint256 amount_
-    ) external override onlyOwner {
-        totalTickets -= amount_;
-        accountTickets[account_] -= amount_;
-        _burn(account_, id_, amount_);
+    function burn(address account_, uint256 id_) external override onlyOwner {
+        uint256 amount = balanceOf(account_, id_);
+        totalTickets -= amount;
+        accountTickets[account_] -= amount;
+        _burn(account_, id_, amount);
     }
 
-    function burnBatch(
-        address account_,
-        uint256[] memory ids_,
-        uint256[] memory amounts_
-    ) external override onlyOwner {
+    function burnBatch(address account_, uint256[] memory ids_) external override onlyOwner {
         uint256 burnedTickets = 0;
-        for (uint256 i = 0; i < amounts_.length; i++) {
-            burnedTickets += amounts_[i];
+        uint256[] memory amounts = new uint256[](ids_.length);
+        for (uint256 i = 0; i < ids_.length; i++) {
+            amounts[i] = balanceOf(account_, ids_[i]);
+            burnedTickets += amounts[i];
         }
         totalTickets -= burnedTickets;
         accountTickets[account_] -= burnedTickets;
-        _burnBatch(account_, ids_, amounts_);
+        _burnBatch(account_, ids_, amounts);
     }
 
     function safeTransferFrom(
