@@ -1,14 +1,15 @@
 const { expect } = require("chai");
 const {
 	ethers: { getContract, getNamedSigners, constants, provider, BigNumber },
-	deployments: { fixture, createFixture }
+	deployments: { fixture, createFixture },
+	timeAndMine
 } = require("hardhat");
 
 describe("SweetpadNFTFreezing", function () {
 	let deployer, caller;
 	let sweetpadNFT, sweetpadTicket, sweetpadNFTFreezing;
 	
-	const blocksPerDay = BigNumber.from(28674);
+	const blocksPerDay = BigNumber.from(1);
 	const blocksPer182Days = blocksPerDay.mul(182);
 	const blocksPer1095Days = blocksPerDay.mul(1095);
 
@@ -107,6 +108,37 @@ describe("SweetpadNFTFreezing", function () {
 
 			await expect(tx).to.emit(sweetpadNFTFreezing, "FrozeBatch").withArgs(caller.address, [1, 3], [freezeEndBlock1, freezeEndBlock2], [5, 60]);
 			await expect(tx).to.emit(sweetpadTicket, "TransferBatch");
+		});
+	});
+
+	describe("unfreeze: ", function () {
+		it("Should revert with 'SweetpadNFTFreezing: Wrong unfreezer'", async function () {
+			// await sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [blocksPer182Days, blocksPer182Days, blocksPer182Days]);
+			await expect(sweetpadNFTFreezing.connect(caller).unfreeze(1)).to.revertedWith("SweetpadNFTFreezing: Wrong unfreezer");
+		});
+
+		it("Should revert with 'SweetpadNFTFreezing: Freeze period don't passed'", async function () {
+			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
+			await sweetpadNFTFreezing.freeze(1, blocksPer182Days);
+
+			await expect(sweetpadNFTFreezing.unfreeze(1)).to.revertedWith(
+				"SweetpadNFTFreezing: Freeze period don't passed"
+			);
+		});
+
+		it("Should unfreeze nft in SweetpadNFTFreezing contract", async function () {
+			await sweetpadNFT.connect(caller).approve(sweetpadNFTFreezing.address, 1);
+			await sweetpadNFTFreezing.freeze(1, blocksPer182Days);
+
+			await timeAndMine.mine(blocksPer182Days);
+
+			const tx = await sweetpadNFTFreezing.unfreeze(1);
+
+			expect(await sweetpadNFT.ownerOf(1)).to.equal(caller.address);
+			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([constants.AddressZero, constants.Zero]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([]);
+			await expect(tx).to.emit(sweetpadNFTFreezing, "Unfroze").withArgs(caller.address, 1);
+			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
 		});
 	});
 
