@@ -144,6 +144,8 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
                     _userNFTs[i] = _userNFTs[len - 1];
                 }
                 _userNFTs.pop();
+
+                break;
             }
         }
     }
