@@ -16,6 +16,10 @@ interface ISweetpadNFTFreezing {
 
     function freezeBatch(uint256[] calldata, uint256[] calldata) external;
 
+    function unfreeze(uint256) external;
+
+    function unfreezeBatch(uint256[] calldata) external;
+
     function blocksPerDay() external pure returns (uint256);
 
     function minFreezePeriod() external pure returns (uint256);
@@ -37,4 +41,8 @@ interface ISweetpadNFTFreezing {
     event Froze(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
 
     event FrozeBatch(address indexed user, uint256[] nftIds, uint256[] freezeEndBlocks, uint256[] ticketsMinted);
+
+    event Unfroze(address indexed user, uint256 nftId);
+
+    event UnfrozeBatch(address indexed user, uint256[] nftId);
 }

@@ -10,7 +10,7 @@ import "./interfaces/ISweetpadTicket.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
-    uint256 private constant BLOCKS_PER_DAY = 28674;
+    uint256 private constant BLOCKS_PER_DAY = 10; // TODO for mainnet change to 28674
     uint256 private constant MIN_PERIOD = 182 * BLOCKS_PER_DAY;
     uint256 private constant MAX_PERIOD = 1095 * BLOCKS_PER_DAY;
 
@@ -70,6 +70,26 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nft.safeBatchTransferFrom(msg.sender, address(this), nftIds, "0x00");
     }
 
+    function unfreeze(uint256 nftId) external override {
+        _unfreeze(nftId);
+
+        emit Unfroze(msg.sender, nftId);
+
+        ticket.burn(msg.sender, nftId);
+        nft.safeTransferFrom(address(this), msg.sender, nftId);
+    }
+
+    function unfreezeBatch(uint256[] calldata nftIds) external override {
+        for (uint256 i = 0; i < nftIds.length; i++) {
+            _unfreeze(nftIds[i]);
+        }
+
+        emit UnfrozeBatch(msg.sender, nftIds);
+
+        ticket.burnBatch(msg.sender, nftIds);
+        nft.safeBatchTransferFrom(address(this), msg.sender, nftIds, "");
+    }
+
     /**
      * @notice Returnс NFTs froze by the user
      */
@@ -107,5 +127,27 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nftData[nftId] = NFTData({freezer: msg.sender, freezeEndBlock: freezeEndBlock});
 
         userNFTs[msg.sender].push(nftId);
+    }
+
+    function _unfreeze(uint256 nftId) private {
+        NFTData memory _nftData = nftData[nftId];
+        // slither-disable-next-line incorrect-equality
+        require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
+        require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
+        // slither-disable-next-line costly-loop
+        delete nftData[nftId];
+
+        uint256[] memory _userNFTs = userNFTs[msg.sender];
+        uint256 len = _userNFTs.length;
+        for (uint256 i = 0; i < len; i++) {
+            if (_userNFTs[i] == nftId) {
+                if (i != len - 1) {
+                    userNFTs[msg.sender][i] = userNFTs[msg.sender][len - 1];
+                }
+                userNFTs[msg.sender].pop();
+
+                break;
+            }
+        }
     }
 }
