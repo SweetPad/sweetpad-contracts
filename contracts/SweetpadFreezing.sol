@@ -27,7 +27,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
     mapping(address => uint256) public override totalPower;
 
     IERC20 public override sweetToken;
-    IERC20 public lpToken;
+    IERC20 public override lpToken;
 
     /**
      * @notice Initialize contract
@@ -47,15 +47,15 @@ contract SweetpadFreezing is ISweetpadFreezing {
     function freezeSWT(uint256 amount_, uint256 period_) external override {
         uint256 power = getPower(amount_, period_);
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, amount_, period_, power, true);
+        _freeze(msg.sender, amount_, period_, power, Asset.SWTToken);
     }
 
-    function freezeLP(uint256 amount_, uint256 period_) external {
+    function freezeLP(uint256 amount_, uint256 period_) external override {
         uint256 lpPrice = 10;
         uint256 swtPrice = 5;
         uint256 power = (getPower((amount_ * lpPrice) / swtPrice, period_) * 110) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, amount_, period_, power, false);
+        _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
     }
 
     /**
@@ -65,7 +65,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
      */
     function unfreezeSWT(uint256 id_, uint256 amount_) external override {
         FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
-        require(freezeData.isSwtToken, "SweetpadFreezing: Wrong ID");
+        require(freezeData.token == Asset.SWTToken, "SweetpadFreezing: Wrong ID");
         require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
         require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient frozen amount");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
@@ -78,9 +78,9 @@ contract SweetpadFreezing is ISweetpadFreezing {
         _unfreezeSWT(msg.sender, id_, amount_, powerDelta);
     }
 
-    function unfreezeLP(uint256 id_) external {
+    function unfreezeLP(uint256 id_) external override {
         FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
-        require(freezeData.isSwtToken == false, "SweetpadFreezing: Wrong ID");
+        require(freezeData.token == Asset.LPToken, "SweetpadFreezing: Wrong ID");
         require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
         _unfreezeLP(msg.sender, id_);
@@ -123,7 +123,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
         uint256 amount_,
         uint256 period_,
         uint256 power_,
-        bool isSwtToken_
+        Asset token_
     ) private {
         freezeInfo[account_].push(
             FreezeInfo({
@@ -131,13 +131,13 @@ contract SweetpadFreezing is ISweetpadFreezing {
                 period: period_,
                 frozenAmount: amount_,
                 power: power_,
-                isSwtToken: isSwtToken_
+                token: token_
             })
         );
         totalPower[account_] += power_;
 
-        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, isSwtToken_);
-        if (isSwtToken_) {
+        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, token_);
+        if (token_ == Asset.SWTToken) {
             sweetToken.safeTransferFrom(account_, address(this), amount_);
             return;
         }

@@ -79,7 +79,7 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(182)),
 				parseEther("20000"),
 				parseEther("10000"),
-				true
+				0
 			]);
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
 			freezeTX = await sweetpadFreezing
@@ -96,7 +96,7 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(1095)),
 				parseEther("20000"),
 				parseEther("40000"),
-				true
+				0
 			]);
 		});
 
@@ -121,7 +121,7 @@ describe("SweetpadFreezing", function () {
 					deployer.address,
 					parseEther("20000"),
 					parseEther("10000"),
-					true
+					0
 				);
 		});
 	});
@@ -255,7 +255,7 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(182)),
 				parseEther("20000"),
 				parseEther("22000"),
-				false
+				1
 			]);
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
 			freezeTX = await sweetpadFreezing.connect(deployer).freezeLP(parseEther("20000"), await daysToBlocks(1095));
@@ -270,7 +270,7 @@ describe("SweetpadFreezing", function () {
 				BigNumber.from(await daysToBlocks(1095)),
 				parseEther("20000"),
 				parseEther("80000").mul(110).div(100),
-				false
+				1
 			]);
 		});
 
@@ -295,7 +295,7 @@ describe("SweetpadFreezing", function () {
 					deployer.address,
 					parseEther("20000"),
 					parseEther("20000").mul(110).div(100),
-					false
+					1
 				);
 		});
 	});
