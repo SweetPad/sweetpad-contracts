@@ -10,7 +10,7 @@ import "./interfaces/ISweetpadTicket.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
-    uint256 private constant BLOCKS_PER_DAY = 1; // TODO for mainnet change to 28674
+    uint256 private constant BLOCKS_PER_DAY = 10; // TODO for mainnet change to 28674
     uint256 private constant MIN_PERIOD = 182 * BLOCKS_PER_DAY;
     uint256 private constant MAX_PERIOD = 1095 * BLOCKS_PER_DAY;
 
@@ -131,9 +131,10 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
     function _unfreeze(uint256 nftId) private {
         NFTData memory _nftData = nftData[nftId];
+        // slither-disable-next-line incorrect-equality
         require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
         require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
-
+        // slither-disable-next-line costly-loop
         delete nftData[nftId];
 
         uint256[] memory _userNFTs = userNFTs[msg.sender];

@@ -8,17 +8,10 @@ const {
 describe("SweetpadNFTFreezing", function () {
 	let deployer, caller;
 	let sweetpadNFT, sweetpadTicket, sweetpadNFTFreezing;
-	
-	const blocksPerDay = BigNumber.from(1);
+
+	const blocksPerDay = BigNumber.from(10);
 	const blocksPer182Days = blocksPerDay.mul(182);
 	const blocksPer1095Days = blocksPerDay.mul(1095);
-
-	const approveAndFreezeBatch = async (freezer, nftIds, periods) => {
-		for(const nftId of nftIds) {
-			await sweetpadNFT.connect(freezer).approve(sweetpadNFTFreezing.address, nftId);
-		}
-		return await sweetpadNFTFreezing.connect(freezer).freezeBatch(nftIds, periods);
-	};
 
 	const setupFixture = createFixture(async () => {
 		await fixture(["", "dev"]);
@@ -73,7 +66,9 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 5);
-			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferSingle")
+				.withArgs(sweetpadNFTFreezing.address, constants.AddressZero, caller.address, 1, 5);
 		});
 
 		it("Should freeze nft in SweetpadNFTFreezing contract (1095 days)", async function () {
@@ -86,15 +81,17 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock]);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1)]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Froze").withArgs(caller.address, 1, freezeEndBlock, 10);
-			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferSingle")
+				.withArgs(sweetpadNFTFreezing.address, constants.AddressZero, caller.address, 1, 10);
 		});
 	});
 
 	describe("freezeBatch: ", function () {
 		it("Should revert with 'SweetpadNFTFreezing: Array lengths is not equal'", async function () {
-			await expect(sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [blocksPer182Days, blocksPer182Days])).to.revertedWith(
-				"SweetpadNFTFreezing: Array lengths is not equal"
-			);
+			await expect(
+				sweetpadNFTFreezing.connect(deployer).freezeBatch([1, 2, 3], [blocksPer182Days, blocksPer182Days])
+			).to.revertedWith("SweetpadNFTFreezing: Array lengths is not equal");
 		});
 
 		it("Should freeze nfts in SweetpadNFTFreezing contract", async function () {
@@ -108,16 +105,25 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFT.ownerOf(3)).to.equal(sweetpadNFTFreezing.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([caller.address, freezeEndBlock1]);
 			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([caller.address, freezeEndBlock2]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(3)
+			]);
 
-			await expect(tx).to.emit(sweetpadNFTFreezing, "FrozeBatch").withArgs(caller.address, [1, 3], [freezeEndBlock1, freezeEndBlock2], [5, 60]);
-			await expect(tx).to.emit(sweetpadTicket, "TransferBatch");
+			await expect(tx)
+				.to.emit(sweetpadNFTFreezing, "FrozeBatch")
+				.withArgs(caller.address, [1, 3], [freezeEndBlock1, freezeEndBlock2], [5, 60]);
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferBatch")
+				.withArgs(sweetpadNFTFreezing.address, constants.AddressZero, caller.address, [1, 3], [5, 60]);
 		});
 	});
 
 	describe("unfreeze: ", function () {
 		it("Should revert with 'SweetpadNFTFreezing: Wrong unfreezer'", async function () {
-			await expect(sweetpadNFTFreezing.connect(caller).unfreeze(1)).to.revertedWith("SweetpadNFTFreezing: Wrong unfreezer");
+			await expect(sweetpadNFTFreezing.connect(caller).unfreeze(1)).to.revertedWith(
+				"SweetpadNFTFreezing: Wrong unfreezer"
+			);
 		});
 
 		it("Should revert with 'SweetpadNFTFreezing: Freeze period don't passed'", async function () {
@@ -137,9 +143,14 @@ describe("SweetpadNFTFreezing", function () {
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(caller.address);
 			expect(await sweetpadNFTFreezing.nftData(1)).to.eql([constants.AddressZero, constants.Zero]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(3), BigNumber.from(2)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(3),
+				BigNumber.from(2)
+			]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Unfroze").withArgs(caller.address, 1);
-			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferSingle")
+				.withArgs(sweetpadNFTFreezing.address, caller.address, constants.AddressZero, 1, 5);
 		});
 
 		it("Should unfreeze second nft in SweetpadNFTFreezing contract", async function () {
@@ -151,9 +162,14 @@ describe("SweetpadNFTFreezing", function () {
 
 			expect(await sweetpadNFT.ownerOf(2)).to.equal(caller.address);
 			expect(await sweetpadNFTFreezing.nftData(2)).to.eql([constants.AddressZero, constants.Zero]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(3)
+			]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Unfroze").withArgs(caller.address, 2);
-			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferSingle")
+				.withArgs(sweetpadNFTFreezing.address, caller.address, constants.AddressZero, 2, 12);
 		});
 
 		it("Should unfreeze third nft in SweetpadNFTFreezing contract", async function () {
@@ -165,15 +181,23 @@ describe("SweetpadNFTFreezing", function () {
 
 			expect(await sweetpadNFT.ownerOf(3)).to.equal(caller.address);
 			expect(await sweetpadNFTFreezing.nftData(3)).to.eql([constants.AddressZero, constants.Zero]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(2)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(2)
+			]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "Unfroze").withArgs(caller.address, 3);
-			await expect(tx).to.emit(sweetpadTicket, "TransferSingle");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferSingle")
+				.withArgs(sweetpadNFTFreezing.address, caller.address, constants.AddressZero, 3, 30);
 		});
 	});
 
 	describe("unfreezeBatch: ", function () {
 		it("Should unfreeze nfts in SweetpadNFTFreezing contract", async function () {
-			await approveAndFreezeBatch(caller, [1, 2, 3, 4], [blocksPer182Days, blocksPer182Days, blocksPer182Days, blocksPer182Days]);
+			await sweetpadNFTFreezing.freezeBatch(
+				[1, 2, 3, 4],
+				[blocksPer182Days, blocksPer182Days, blocksPer182Days, blocksPer182Days]
+			);
 
 			await timeAndMine.mine(blocksPer182Days);
 
@@ -183,21 +207,29 @@ describe("SweetpadNFTFreezing", function () {
 			expect(await sweetpadNFT.ownerOf(4)).to.equal(caller.address);
 			expect(await sweetpadNFTFreezing.nftData(2)).to.eql([constants.AddressZero, constants.Zero]);
 			expect(await sweetpadNFTFreezing.nftData(4)).to.eql([constants.AddressZero, constants.Zero]);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(1), BigNumber.from(3)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(3)
+			]);
 			await expect(tx).to.emit(sweetpadNFTFreezing, "UnfrozeBatch").withArgs(caller.address, [2, 4]);
-			await expect(tx).to.emit(sweetpadTicket, "TransferBatch");
+			await expect(tx)
+				.to.emit(sweetpadTicket, "TransferBatch")
+				.withArgs(sweetpadNFTFreezing.address, caller.address, constants.AddressZero, [2, 4], [12, 5]);
 		});
 	});
 
 	describe("getNftsFrozeByUser: ", function () {
 		it("Should return correct nft id's", async function () {
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([]);
-			
+
 			await sweetpadNFTFreezing.freeze(2, blocksPer1095Days);
 			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(2)]);
 
 			await sweetpadNFTFreezing.freeze(1, blocksPer1095Days);
-			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([BigNumber.from(2), BigNumber.from(1)]);
+			expect(await sweetpadNFTFreezing.getNftsFrozeByUser(caller.address)).to.eql([
+				BigNumber.from(2),
+				BigNumber.from(1)
+			]);
 		});
 	});
 
