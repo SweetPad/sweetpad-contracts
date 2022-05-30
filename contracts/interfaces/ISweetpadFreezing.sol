@@ -7,6 +7,8 @@ interface ISweetpadFreezing {
         uint256 frozenUntil; // blockNumber when can be unfrozen
         uint256 period; // Number of blocks that tokens are frozen
         uint256 frozenAmount; // Amount of tokens are frozen
+        uint256 power; // power of current frozen amount
+        bool isSwtToken; // Variable to identify if the token is SWT or LP
     }
 
     function freezeInfo(address, uint256)
@@ -15,7 +17,9 @@ interface ISweetpadFreezing {
         returns (
             uint256,
             uint256,
-            uint256
+            uint256,
+            uint256,
+            bool
         );
 
     function sweetToken() external view returns (IERC20);
@@ -37,7 +41,7 @@ interface ISweetpadFreezing {
     function getPower(uint256, uint256) external pure returns (uint256);
 
     /// @notice Emitted when tokens are frozen
-    event Freeze(uint256, address indexed, uint256, uint256);
+    event Freeze(uint256, address indexed, uint256, uint256, bool);
     /// @notice Emitted when tokens are unFrozen
     event UnFreeze(uint256, address indexed, uint256);
 }

@@ -1,10 +1,11 @@
 module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, getContract } }) => {
 	const { deployer } = await getNamedSigners();
 	const sweetToken = await getContract("SweetpadToken");
+	const lpToken = await getContract("lpToken");
 	await deploy("SweetpadFreezing", {
 		from: deployer.address,
 		contract: "SweetpadFreezing",
-		args: [sweetToken.address],
+		args: [sweetToken.address, lpToken.address],
 		log: true
 	});
 
