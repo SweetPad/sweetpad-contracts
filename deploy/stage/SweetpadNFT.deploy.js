@@ -19,4 +19,5 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 
 	return sweetpadNFT;
 };
+
 module.exports.tags = ["SweetpadNFT", "stage"];

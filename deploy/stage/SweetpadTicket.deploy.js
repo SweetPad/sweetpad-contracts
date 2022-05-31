@@ -17,4 +17,5 @@ module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, get
 
 	return sweetpadTicket;
 };
+
 module.exports.tags = ["SweetpadTicket", "stage"];

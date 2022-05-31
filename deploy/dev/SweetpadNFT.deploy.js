@@ -8,4 +8,5 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 		log: true,
 	});
 };
+
 module.exports.tags = ["SweetpadNFT", "dev"];
