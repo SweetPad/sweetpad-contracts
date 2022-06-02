@@ -38,6 +38,7 @@ describe("SweetpadFreezing", function () {
 
 	describe("Initialization: ", function () {
 		it("Should initialize with correct values", async function () {
+			expect(await sweetpadFreezing.owner()).to.equal(deployer.address);
 			expect(await sweetpadFreezing.sweetToken()).to.equal(sweetToken.address);
 			expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(10);
 			expect(await sweetpadFreezing.getMinFreezePeriod()).to.equal(
@@ -208,6 +209,17 @@ describe("SweetpadFreezing", function () {
 			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("20000")))
 				.to.emit(sweetpadFreezing, "UnFreeze")
 				.withArgs(0, deployer.address, parseEther("20000"));
+		});
+	});
+
+	describe("setSweetToken: ", function () {
+		it("Should revert with 'SweetpadFreezing: Token address cant be Zero address'", async function () {
+			await expect(sweetpadFreezing.setSweetToken(constants.AddressZero)).to.revertedWith("SweetpadFreezing: Token address cant be Zero address");
+		});
+
+		it("Should set new address", async function () {
+			await sweetpadFreezing.setSweetToken(caller.address);
+			expect(await sweetpadFreezing.sweetToken()).to.equal(caller.address);
 		});
 	});
 });

@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.7;
+pragma solidity ^0.8.7;
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./interfaces/ISweetpadFreezing.sol";
@@ -10,7 +11,7 @@ import "./interfaces/ISweetpadFreezing.sol";
  * @title SweetpadFreezing
  * @dev Contract module which provides functionality to freeze assets on contract and get allocation.
  */
-contract SweetpadFreezing is ISweetpadFreezing {
+contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     using SafeERC20 for IERC20;
     uint16 private constant DAYS_IN_YEAR = 365;
     // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
@@ -32,8 +33,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
      * @notice Initialize contract
      */
     constructor(IERC20 sweetToken_) {
-        require(address(sweetToken_) != address(0), "SweetpadFreezing: Token address cant be Zero address");
-        sweetToken = sweetToken_;
+        setSweetToken(sweetToken_);
     }
 
     /**
@@ -70,15 +70,15 @@ contract SweetpadFreezing is ISweetpadFreezing {
         return freezeInfo[account_];
     }
 
-    function getBlocksPerDay() external view override returns (uint256) {
+    function getBlocksPerDay() external pure override returns (uint256) {
         return BLOCKS_PER_DAY;
     }
 
-    function getMinFreezePeriod() external view override returns (uint256) {
+    function getMinFreezePeriod() external pure override returns (uint256) {
         return MIN_FREEZE_PERIOD;
     }
 
-    function getMaxFreezePeriod() external view override returns (uint256) {
+    function getMaxFreezePeriod() external pure override returns (uint256) {
         return MAX_FREEZE_PERIOD;
     }
 
@@ -96,6 +96,11 @@ contract SweetpadFreezing is ISweetpadFreezing {
 
         power = ((period_ + DAYS_IN_YEAR * BLOCKS_PER_DAY) * amount_) / (DAYS_IN_YEAR * 2) / BLOCKS_PER_DAY;
         return power;
+    }
+
+    function setSweetToken(IERC20 sweetToken_) public override onlyOwner {
+        require(address(sweetToken_) != address(0), "SweetpadFreezing: Token address cant be Zero address");
+        sweetToken = sweetToken_;
     }
 
     function _freezeSWT(

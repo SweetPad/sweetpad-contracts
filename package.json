@@ -1,5 +1,5 @@
 {
-	"name": "QuickStart",
+	"name": "Sweetpad Protocol",
 	"license": "MIT",
 	"scripts": {
 		"compile": "npx hardhat compile",
