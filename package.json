@@ -1,5 +1,5 @@
 {
-	"name": "Sweetpad Protocol",
+	"name": "sweetpad-protocol",
 	"license": "MIT",
 	"scripts": {
 		"compile": "npx hardhat compile",
