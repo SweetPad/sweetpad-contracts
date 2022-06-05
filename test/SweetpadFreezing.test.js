@@ -34,6 +34,7 @@ describe("SweetpadFreezing", function () {
 
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, lpToken] = await setupFixture();
+		await sweetpadFreezing.setMultiplier(250);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 		await lpToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 	});
@@ -249,12 +250,16 @@ describe("SweetpadFreezing", function () {
 				.connect(deployer)
 				.freezeLP(parseEther("20000"), await daysToBlocks(182));
 			let lockedPeriod = BigNumber.from(freezeTX.blockNumber).add(BigNumber.from(await daysToBlocks(182)));
-			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(parseEther("20000").mul(110).div(100));
+			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
+				parseEther("10000")
+					.mul(await sweetpadFreezing.multiplier())
+					.div(100)
+			);
 			expect(await sweetpadFreezing.freezeInfo(deployer.address, 0)).to.eql([
 				BigNumber.from(lockedPeriod),
 				BigNumber.from(await daysToBlocks(182)),
 				parseEther("20000"),
-				parseEther("22000"),
+				parseEther("25000"),
 				1
 			]);
 			const totalPower = await sweetpadFreezing.totalPower(deployer.address);
@@ -263,13 +268,17 @@ describe("SweetpadFreezing", function () {
 
 			expect((await sweetpadFreezing.getFreezes(deployer.address)).length).to.equal(2);
 			expect(await sweetpadFreezing.totalPower(deployer.address)).to.equal(
-				BigNumber.from(totalPower).add(parseEther("80000").mul(110).div(100))
+				BigNumber.from(totalPower).add(
+					parseEther("40000")
+						.mul(await sweetpadFreezing.multiplier())
+						.div(100)
+				)
 			);
 			expect(await sweetpadFreezing.freezeInfo(deployer.address, 1)).to.eql([
 				BigNumber.from(lockedPeriod),
 				BigNumber.from(await daysToBlocks(1095)),
 				parseEther("20000"),
-				parseEther("80000").mul(110).div(100),
+				parseEther("100000"),
 				1
 			]);
 		});
@@ -294,7 +303,9 @@ describe("SweetpadFreezing", function () {
 					(await sweetpadFreezing.getFreezes(deployer.address)).length - 1,
 					deployer.address,
 					parseEther("20000"),
-					parseEther("20000").mul(110).div(100),
+					parseEther("10000")
+						.mul(await sweetpadFreezing.multiplier())
+						.div(100),
 					1
 				);
 		});
@@ -353,6 +364,25 @@ describe("SweetpadFreezing", function () {
 			await expect(sweetpadFreezing.connect(deployer).unfreezeLP(0))
 				.to.emit(sweetpadFreezing, "UnFreeze")
 				.withArgs(0, deployer.address, parseEther("20000"));
+		});
+	});
+
+	describe("SetMultiplier function", function () {
+		it("Can call only admin", async function () {
+			await expect(sweetpadFreezing.connect(caller).setMultiplier(100)).to.be.revertedWith(
+				"Ownable: caller is not the owner"
+			);
+		});
+
+		it("Should revert with: 'SweetpadFreezing: Multiplier can't be zero'", async function () {
+			await expect(sweetpadFreezing.setMultiplier(0)).to.be.revertedWith(
+				"SweetpadFreezing: Multiplier can't be zero"
+			);
+		});
+
+		it("Should set multiplier", async function () {
+			await sweetpadFreezing.setMultiplier(150);
+			expect(await sweetpadFreezing.multiplier()).to.equal(150);
 		});
 	});
 });

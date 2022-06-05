@@ -4,13 +4,14 @@ pragma solidity 0.8.7;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ISweetpadFreezing.sol";
 
 /**
  * @title SweetpadFreezing
  * @dev Contract module which provides functionality to freeze assets on contract and get allocation.
  */
-contract SweetpadFreezing is ISweetpadFreezing {
+contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     using SafeERC20 for IERC20;
     uint16 private constant DAYS_IN_YEAR = 365;
     // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
@@ -19,6 +20,8 @@ contract SweetpadFreezing is ISweetpadFreezing {
     uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;
     // Max period counted with blocks that user can freeze assets
     uint256 private constant MAX_FREEZE_PERIOD = 1095 * BLOCKS_PER_DAY;
+
+    uint256 public override multiplier;
 
     /// @dev The data for each account
     mapping(address => FreezeInfo[]) public override freezeInfo;
@@ -51,9 +54,7 @@ contract SweetpadFreezing is ISweetpadFreezing {
     }
 
     function freezeLP(uint256 amount_, uint256 period_) external override {
-        uint256 lpPrice = 10;
-        uint256 swtPrice = 5;
-        uint256 power = (getPower((amount_ * lpPrice) / swtPrice, period_) * 110) / 100;
+        uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
     }
@@ -84,6 +85,11 @@ contract SweetpadFreezing is ISweetpadFreezing {
         require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
         _unfreezeLP(msg.sender, id_);
+    }
+
+    function setMultiplier(uint256 multiplier_) external override onlyOwner {
+        require(multiplier_ != 0, "SweetpadFreezing: Multiplier can't be zero");
+        multiplier = multiplier_;
     }
 
     function getFreezes(address account_) external view override returns (FreezeInfo[] memory) {

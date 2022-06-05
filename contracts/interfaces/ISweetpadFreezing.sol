@@ -30,6 +30,8 @@ interface ISweetpadFreezing {
 
     function lpToken() external view returns (IERC20);
 
+    function multiplier() external view returns (uint256);
+
     function getBlocksPerDay() external view returns (uint256);
 
     function getMinFreezePeriod() external view returns (uint256);
@@ -45,6 +47,8 @@ interface ISweetpadFreezing {
     function unfreezeSWT(uint256, uint256) external;
 
     function unfreezeLP(uint256) external;
+
+    function setMultiplier(uint256) external;
 
     function getFreezes(address) external view returns (FreezeInfo[] memory);
 
