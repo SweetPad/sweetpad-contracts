@@ -154,6 +154,13 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
             _exists(tokenId_) ? string(abi.encodePacked(_baseURI(), Strings.toString(tokenId_), ".json")) : _baseURI();
     }
 
+    /**
+     * @notice Returns user NFTs 
+     */
+    function getUserNfts(address user) external view override returns (uint256[] memory) {
+        return userNFTs[user];
+    }
+
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }

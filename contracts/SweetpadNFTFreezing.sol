@@ -91,7 +91,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     }
 
     /**
-     * @notice Returnс NFTs froze by the user
+     * @notice Returns NFTs froze by the user
      */
     function getNftsFrozeByUser(address user) external view override returns (uint256[] memory) {
         return userNFTs[user];
