@@ -35,6 +35,7 @@ describe("SweetpadFreezing", function () {
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, lpToken] = await setupFixture();
 		await sweetpadFreezing.setMultiplier(250);
+		await sweetpadFreezing.setLPToken(lpToken.address);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 		await lpToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 	});
@@ -224,7 +225,7 @@ describe("SweetpadFreezing", function () {
 			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
 			await expect(sweetpadFreezing.connect(deployer).unfreezeSWT(0, parseEther("20000")))
 				.to.emit(sweetpadFreezing, "UnFreeze")
-				.withArgs(0, deployer.address, parseEther("20000"));
+				.withArgs(0, deployer.address, parseEther("20000"), 0);
 		});
 	});
 
@@ -312,18 +313,6 @@ describe("SweetpadFreezing", function () {
 	});
 
 	describe("UnfreezeLP function", function () {
-		it("Should revert with 'SweetpadFreezing: Frozen amount is Zero'", async function () {
-			await lpToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
-			await sweetpadFreezing.connect(deployer).freezeLP(parseEther("40000"), await daysToBlocks(182));
-
-			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
-
-			await sweetpadFreezing.connect(deployer).unfreezeLP(0);
-			await expect(sweetpadFreezing.connect(deployer).unfreezeLP(0)).to.be.revertedWith(
-				"SweetpadFreezing: Frozen amount is Zero"
-			);
-		});
-
 		it("Should revert with 'SweetpadFreezing: Locked period dosn`t pass'", async function () {
 			await lpToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
 			await sweetpadFreezing.connect(deployer).freezeLP(parseEther("40000"), await daysToBlocks(182));
@@ -363,7 +352,7 @@ describe("SweetpadFreezing", function () {
 			await timeAndMine.mine((await sweetpadFreezing.freezeInfo(deployer.address, 0)).frozenUntil);
 			await expect(sweetpadFreezing.connect(deployer).unfreezeLP(0))
 				.to.emit(sweetpadFreezing, "UnFreeze")
-				.withArgs(0, deployer.address, parseEther("20000"));
+				.withArgs(0, deployer.address, parseEther("20000"), 1);
 		});
 	});
 

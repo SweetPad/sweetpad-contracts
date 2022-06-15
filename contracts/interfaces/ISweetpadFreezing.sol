@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.8.7;
+pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface ISweetpadFreezing {
@@ -55,7 +55,7 @@ interface ISweetpadFreezing {
     function getPower(uint256, uint256) external pure returns (uint256);
 
     /// @notice Emitted when tokens are frozen
-    event Freeze(uint256, address indexed, uint256, uint256, Asset);
+    event Freeze(uint256 id, address indexed account, uint256 amount, uint256 power, Asset);
     /// @notice Emitted when tokens are unFrozen
-    event UnFreeze(uint256, address indexed, uint256);
+    event UnFreeze(uint256 id, address indexed account, uint256 power, Asset);
 }
