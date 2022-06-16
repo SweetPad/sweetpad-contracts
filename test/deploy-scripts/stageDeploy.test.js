@@ -16,11 +16,11 @@ describe("StageDeploy", function () {
 		sweetpadNFT = await getContract("SweetpadNFT");
 		sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing");
 		sweetpadTicket = await getContract("SweetpadTicket");
-		sweetpadToken = "0x130260C77C7DCAf6912eA9F77803271615CE9514";
+		sweetpadToken = await getContract("SweetpadTicket");
 	});
 
 	it("SweetpadFreezing", async function () {
-		expect(await sweetpadFreezing.sweetToken()).to.equal(sweetpadToken);
+		expect(await sweetpadFreezing.sweetToken()).to.equal(sweetpadToken.address);
 		expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(10);
 		expect(await sweetpadFreezing.getMinFreezePeriod()).to.equal(
 			(await sweetpadFreezing.getBlocksPerDay()).mul(182)
