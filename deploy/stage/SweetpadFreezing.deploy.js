@@ -2,7 +2,7 @@ module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, ge
 	const { deployer } = await getNamedSigners();
 	let sweetpadFreezing;
 
-	const sweetToken = await getContractAt("SweetpadToken", "0x130260C77C7DCAf6912eA9F77803271615CE9514");
+	const sweetToken = await getContract("SweetpadToken");
 
 	try {
 		await deploy("SweetpadFreezing", {
