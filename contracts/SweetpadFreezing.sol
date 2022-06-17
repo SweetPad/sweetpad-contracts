@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/ISweetpadFreezing.sol";
 import "./interfaces/IPancakeRouter02.sol";
 import "./interfaces/IPancakeswapPair.sol";
-import "hardhat/console.sol";
 
 /**
  * @title SweetpadFreezing
@@ -81,8 +80,9 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @notice Freeze LP tokens
      * @param period_ Period of freezing
      * @param deadline_ Timestamp after which the transaction will revert.
-     */
-    function freezeWithBNB(uint256 period_, uint256 deadline_) public payable {
+     */ 
+    // slither-disable-next-line reentrancy-benign
+    function freezeWithBNB(uint256 period_, uint256 amountOutMin, uint256 amountTokenMin, uint256 amountETHMin,  uint256 deadline_) public payable {
         IPancakeswapPair lp = IPancakeswapPair(address(lpToken));
 
         require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "Wrong LP");
@@ -99,7 +99,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         path[1] = address(token);
 
         uint256[] memory swapResult = router.swapExactETHForTokens{value: msg.value / 2}(
-            0,
+            amountOutMin,
             path,
             address(this),
             deadline_
@@ -107,13 +107,13 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         uint256 tokenAmount = swapResult[1];
 
-        token.approve(ROUTER_ADDRESS, tokenAmount);
+        token.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
         (, , uint256 lpResult) = router.addLiquidityETH{value: msg.value / 2}(
             address(token),
             tokenAmount,
-            0,
-            0,
+            amountTokenMin,
+            amountETHMin,
             address(this),
             deadline_
         );
@@ -158,6 +158,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function setMultiplier(uint256 multiplier_) external override onlyOwner {
         require(multiplier_ != 0, "SweetpadFreezing: Multiplier can't be zero");
         multiplier = multiplier_;
+        emit MultiplierReseted(multiplier);
     }
 
     /**

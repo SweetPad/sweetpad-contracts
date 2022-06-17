@@ -58,4 +58,6 @@ interface ISweetpadFreezing {
     event Freeze(uint256 id, address indexed account, uint256 amount, uint256 power, Asset);
     /// @notice Emitted when tokens are unFrozen
     event UnFreeze(uint256 id, address indexed account, uint256 power, Asset);
+    /// @notice Emmited when multiplier reseted
+    event MultiplierReseted(uint256 multiplier);
 }

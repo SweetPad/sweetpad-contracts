@@ -60,7 +60,7 @@ describe("SweetpadFreezing", function () {
 
 			const tx = await sweetpadFreezing
 				.connect(caller)
-				.freezeWithBNB(3650, (await ethers.provider.getBlock()).timestamp + 100, {
+				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
 					value: ethers.utils.parseUnits("100")
 				});
 
