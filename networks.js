@@ -15,7 +15,7 @@ module.exports = {
 			chainId: 31337,
 			forking: {
 				enabled: IS_FORKING,
-				url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+				url: "https://eth-mainnet.alchemyapi.io/v2/i3Ma_NT_hL2_Uef_Q6FYVyYkAlQIzFtR",
 				blockNumber: 14938317
 			},
 			accounts: {
