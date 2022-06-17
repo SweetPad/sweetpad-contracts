@@ -31,7 +31,7 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || "";
 const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || "";
-const HARDHAT_DEPENDENCY_COMPILER_KEEP = (process.env.HARDHAT_DEPENDENCY_COMPILER_KEEP === "true");
+const HARDHAT_DEPENDENCY_COMPILER_KEEP = process.env.HARDHAT_DEPENDENCY_COMPILER_KEEP === "true";
 
 /**
  * @type import('hardhat/config').HardhatUserConfig
@@ -140,4 +140,7 @@ module.exports = {
 	preprocess: {
 		eachLine: removeConsoleLog((hre) => hre.network.name !== "hardhat" && hre.network.name !== "localhost")
 	},
+	paths: {
+		tests: "./test/unit",
+	}
 };
