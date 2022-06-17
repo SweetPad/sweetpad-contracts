@@ -12,7 +12,9 @@ interface IPancakeRouter01 {
     function addLiquidity(
         address tokenA,
         address tokenB,
+        // slither-disable-next-line similar-names
         uint256 amountADesired,
+        // slither-disable-next-line similar-names
         uint256 amountBDesired,
         uint256 amountAMin,
         uint256 amountBMin,
