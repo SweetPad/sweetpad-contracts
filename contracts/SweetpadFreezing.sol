@@ -85,12 +85,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function freezeWithBNB(uint256 period_, uint256 amountOutMin, uint256 amountTokenMin, uint256 amountETHMin,  uint256 deadline_) external payable {
         IPancakeswapPair lp = IPancakeswapPair(address(lpToken));
 
-        // slither-disable-next-line naming-convention
         require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "Wrong LP");
 
         IERC20 token = IERC20(lp.token0());
 
-        // slither-disable-next-line naming-convention
         if (lp.token0() == router.WETH()) {
             token = IERC20(lp.token1());
         }

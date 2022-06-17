@@ -5,8 +5,10 @@ pragma solidity 0.8.7;
 interface IPancakeRouter01 {
     function factory() external pure returns (address);
 
+    // slither-disable-next-line naming-convention
     function WETH() external pure returns (address);
 
+    // slither-disable-next-line abiencoderv2-array
     function addLiquidity(
         address tokenA,
         address tokenB,
