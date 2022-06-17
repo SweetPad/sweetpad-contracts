@@ -1,5 +1,6 @@
 const FORKING_API_KEY = process.env.FORKING_API_KEY || "";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
+const IS_FORKING = process.env.IS_FORKING === "true";
 
 module.exports = {
 	networks: {
@@ -12,7 +13,7 @@ module.exports = {
 		hardhat: {
 			chainId: 31337,
 			forking: {
-				enabled: false,
+				enabled: IS_FORKING,
 				url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
 				blockNumber: 14938317
 			},
