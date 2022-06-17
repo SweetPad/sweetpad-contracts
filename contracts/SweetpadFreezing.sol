@@ -70,7 +70,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param amount_ Amount of tokens to freeze
      * @param period_ Period of freezing
      */
-    function freezeLP(uint256 amount_, uint256 period_) public override {
+    function freezeLP(uint256 amount_, uint256 period_) external override {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
@@ -82,7 +82,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param deadline_ Timestamp after which the transaction will revert.
      */ 
     // slither-disable-next-line reentrancy-benign
-    function freezeWithBNB(uint256 period_, uint256 amountOutMin, uint256 amountTokenMin, uint256 amountETHMin,  uint256 deadline_) public payable {
+    function freezeWithBNB(uint256 period_, uint256 amountOutMin, uint256 amountTokenMin, uint256 amountETHMin,  uint256 deadline_) external payable {
         IPancakeswapPair lp = IPancakeswapPair(address(lpToken));
 
         require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "Wrong LP");
@@ -98,6 +98,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         path[0] = router.WETH();
         path[1] = address(token);
 
+    // slither-disable-next-line reentrancy-events
         uint256[] memory swapResult = router.swapExactETHForTokens{value: msg.value / 2}(
             amountOutMin,
             path,
@@ -107,8 +108,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         uint256 tokenAmount = swapResult[1];
 
+    // slither-disable-next-line reentrancy-events
         token.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
+    // slither-disable-next-line reentrancy-events
         (, , uint256 lpResult) = router.addLiquidityETH{value: msg.value / 2}(
             address(token),
             tokenAmount,
@@ -228,6 +231,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         lpToken.safeTransferFrom(account_, address(this), amount_);
     }
 
+    // slither-disable-next-line reentrancy-benign
     function _freezeLPWithBNB(
         address account_,
         uint256 amount_,
@@ -236,6 +240,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     ) private {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
+    // slither-disable-next-line reentrancy-benign
         freezeInfo[account_].push(
             FreezeInfo({
                 frozenUntil: block.number + period_,
@@ -245,8 +250,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
                 token: token_
             })
         );
+    // slither-disable-next-line reentrancy-benign
         totalPower[account_] += power;
 
+    // slither-disable-next-line reentrancy-events
         emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power, token_);
     }
 
