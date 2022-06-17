@@ -1,5 +1,6 @@
 const FORKING_API_KEY = process.env.FORKING_API_KEY || "";
 const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || "";
+const DEPLOY_ENV = process.env.DEPLOY_ENV || "dev";
 
 module.exports = {
 	networks: {
@@ -25,8 +26,8 @@ module.exports = {
 			// initialDate: new Date("01/01/2021"),
 			allowUnlimitedContractSize: true,
 			initialBaseFeePerGas: 0,
-			tags: ["dev"],
-			deploy: ["./deploy/dev"],
+			tags: [DEPLOY_ENV],
+			deploy: [`./deploy/${DEPLOY_ENV}`],
 			env: {
 				name: "test variable"
 			}
