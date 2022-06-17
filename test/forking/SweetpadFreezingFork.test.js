@@ -2,13 +2,15 @@ const { expect } = require("chai");
 const {
 	ethers: {
 		getContract,
-		getNamedSigners,
 		utils: { parseEther },
 		BigNumber
 	},
 	deployments: { fixture, createFixture },
 	ethers
 } = require("hardhat");
+const hre = require("hardhat");
+const DEPLOYER = "0x4bd5b80ADb4eEC52e58b46c8748C6e9B4524CcA8";
+const CALLER = "0xa6A62c0110762c52cFB7303BA1F9A2e8b25CBdA7";
 
 const setupFixture = createFixture(async () => {
 	await fixture(["", "dev"]);
@@ -27,7 +29,15 @@ describe("SweetpadFreezing", function () {
 	let deployer, caller, sweetpadFreezing, sweetToken, router, factory, weth, lpAddress, lp;
 
 	before("Before All: ", async function () {
-		({ deployer, caller } = await getNamedSigners());
+		[deployer, caller] = await Promise.all(
+			[DEPLOYER, CALLER].map(async (address) => {
+				await hre.network.provider.request({
+					method: "hardhat_impersonateAccount",
+					params: [address]
+				});
+				return await ethers.getSigner(address);
+			})
+		);
 	});
 
 	beforeEach(async function () {
