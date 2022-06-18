@@ -18,8 +18,8 @@ const setupFixture = createFixture(async () => {
 	const sweetToken = await getContract("SweetpadToken");
 	const sweetpadFreezing = await getContract("SweetpadFreezing");
 
-	const router = await ethers.getContractAt("IPancakeRouter02", "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
-	const factory = await ethers.getContractAt("IPancakeFactory", "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f");
+	const router = await ethers.getContractAt("IApeRouter02", "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
+	const factory = await ethers.getContractAt("IApeFactory", "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f");
 	const weth = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
 	return [sweetpadFreezing, sweetToken, router, factory, weth];

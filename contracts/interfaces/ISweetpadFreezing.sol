@@ -32,11 +32,11 @@ interface ISweetpadFreezing {
 
     function multiplier() external view returns (uint256);
 
-    function getBlocksPerDay() external view returns (uint256);
+    function getBlocksPerDay() external pure returns (uint256);
 
-    function getMinFreezePeriod() external view returns (uint256);
+    function getMinFreezePeriod() external pure returns (uint256);
 
-    function getMaxFreezePeriod() external view returns (uint256);
+    function getMaxFreezePeriod() external pure returns (uint256);
 
     function totalPower(address) external view returns (uint256);
 
