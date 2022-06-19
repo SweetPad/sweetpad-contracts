@@ -100,7 +100,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 tokenAmount = swapResult[1];
 
         // slither-disable-next-line reentrancy-events
-        (uint256 amountToken, uint256 amountETH, uint256 liquidity) = _addLiquidityETH(
+        uint256 liquidity = _addLiquidityETH(
+            msg.sender,
             msg.value / 2,
             address(sweetToken),
             tokenAmount,
@@ -108,14 +109,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             amountETHMin,
             deadline_
         );
-
-        if (msg.value / 2 - amountETH > 0) {
-            _trunsferUnusedBNB(msg.sender, msg.value / 2 - amountETH);
-        }
-
-        if (tokenAmount - amountToken > 0) {
-            _trunsferUnusedSWT(msg.sender, tokenAmount - amountToken);
-        }
 
         _freezeLPWithBNB(msg.sender, liquidity, period_, Asset.LPToken);
     }
@@ -278,16 +271,32 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         lpToken.safeTransfer(account_, amount);
     }
 
-    function _trunsferUnusedBNB(address to, uint256 amount) private {
-        payable(to).transfer(amount);
-    }
+    function _trunsferUnusedBNB(address to, uint256 amount) private {}
 
-    function _trunsferUnusedSWT(address to, uint256 amount) private {
-        sweetToken.safeTransfer(to, amount);
+    function _trunsferUnusedSWT(address to, uint256 amount) private {}
+
+    function _transferBackUnusedAssets(
+        address to,
+        uint256 ethAmount,
+        uint256 tokenAmount,
+        uint256 ethAmountAdded,
+        uint256 tokenAmountAdded
+    ) private {
+        uint256 ethToTransfer = ethAmount - ethAmountAdded;
+        uint256 tokenToTransfer = tokenAmount - tokenAmountAdded;
+
+        if (ethToTransfer > 0) {
+            payable(to).transfer(ethToTransfer);
+        }
+
+        if (tokenToTransfer > 0) {
+            sweetToken.safeTransfer(to, tokenToTransfer);
+        }
     }
 
     function _addLiquidityETH(
-        uint256 amount,
+        address account,
+        uint256 ethAmount,
         address token,
         uint256 tokenAmount,
         uint256 amountTokenMin,
@@ -296,15 +305,13 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     )
         private
         returns (
-            uint256 amountToken,
-            uint256 amountETH,
-            uint256 liquidity
+            uint256
         )
     {
         // slither-disable-next-line reentrancy-events
         sweetToken.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
-        (amountToken, amountETH, liquidity) = router.addLiquidityETH{value: amount}(
+        (uint256 amountTokenAdded, uint256 amountETHAdded, uint256 liquidity) = router.addLiquidityETH{value: ethAmount}(
             token,
             tokenAmount,
             amountTokenMin,
@@ -312,7 +319,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             address(this),
             deadline_
         );
-        return (amountToken, amountETH, liquidity);
+
+        _transferBackUnusedAssets(account, ethAmount, tokenAmount, amountETHAdded, amountTokenAdded);
+
+        return liquidity;
     }
 
     function _swapExactETHForSwtTokens(
