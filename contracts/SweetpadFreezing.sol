@@ -15,15 +15,21 @@ import "./interfaces/ISweetpadFreezing.sol";
  */
 contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     using SafeERC20 for IERC20;
+
     uint16 private constant DAYS_IN_YEAR = 365;
+
     // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
     uint256 private constant BLOCKS_PER_DAY = 10;
+
     // Min period counted with blocks that user can freeze assets
     uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;
+
     // Max period counted with blocks that user can freeze assets
     uint256 private constant MAX_FREEZE_PERIOD = 1095 * BLOCKS_PER_DAY;
+
     // TODO set correct mainnet addresses before deploying
     address public constant ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+
     /// @dev Multiplier to colculate power while freezing with LP
     uint256 public override multiplier;
 
@@ -106,10 +112,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         path[1] = address(token);
 
         // slither-disable-next-line reentrancy-events
-        uint256[] memory swapResult = router.swapExactETHForTokens{value: msg.value / 2}(
+        uint256[] memory swapResult = _swapExactETHForTokens(
+            msg.value / 2,
             amountOutMin,
             path,
-            address(this),
             deadline_
         );
 
@@ -128,6 +134,16 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             deadline_
         );
         _freezeLPWithBNB(msg.sender, lpResult, period_, Asset.LPToken);
+    }
+
+    function _swapExactETHForTokens(
+        uint256 amount,
+        uint256 amountOutMin,
+        address[] memory path,
+        uint256 deadline_
+    ) private returns (uint256[] memory amounts) {
+        amounts = router.swapExactETHForTokens{value: amount}(amountOutMin, path, address(this), deadline_);
+        return amounts;
     }
 
     /**
