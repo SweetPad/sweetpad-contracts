@@ -70,15 +70,6 @@ describe("SweetpadFreezingFork", function () {
 	});
 
 	describe("Freeze LP with BNB", function () {
-		it("Should revert if lp setted incorrect and user tryes to freeze", async function () {
-			await sweetpadFreezing.setLPToken("0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168");
-			await expect(sweetpadFreezing
-				.connect(caller)
-				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
-					value: ethers.utils.parseUnits("100")
-				})).to.be.revertedWith("SweetpadFreezing: Wrong LP");
-		});
-
 		it("Should revert if power is less than 10000 xSWT", async function () {
 			await expect(sweetpadFreezing
 				.connect(caller)

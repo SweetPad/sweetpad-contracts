@@ -94,34 +94,18 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amountETHMin,
         uint256 deadline_
     ) external payable {
-        IApePair lp = IApePair(address(lpToken));
-
-        require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "SweetpadFreezing: Wrong LP");
-
-        IERC20 token = IERC20(lp.token0());
-
-        if (lp.token0() == router.WETH()) {
-            token = IERC20(lp.token1());
-        }
-
-        address[] memory path = new address[](2);
-
-        // slither-disable-next-line naming-convention
-        path[0] = router.WETH();
-        path[1] = address(token);
-
         // slither-disable-next-line reentrancy-events
-        uint256[] memory swapResult = _swapExactETHForSwtTokens(msg.value / 2, amountOutMin, path, deadline_);
+        uint256[] memory swapResult = _swapExactETHForSwtTokens(msg.value / 2, amountOutMin, deadline_);
 
         uint256 tokenAmount = swapResult[1];
 
         // slither-disable-next-line reentrancy-events
-        token.safeApprove(ROUTER_ADDRESS, tokenAmount);
+        sweetToken.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
         // slither-disable-next-line reentrancy-events
         (uint256 amountToken, uint256 amountETH, uint256 liquidity) = _addLiquidityETH(
             msg.value / 2,
-            address(token),
+            address(sweetToken),
             tokenAmount,
             amountTokenMin,
             amountETHMin,
@@ -333,9 +317,14 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function _swapExactETHForSwtTokens(
         uint256 amount,
         uint256 amountOutMin,
-        address[] memory path,
         uint256 deadline_
     ) private returns (uint256[] memory amounts) {
+        address[] memory path = new address[](2);
+
+        // slither-disable-next-line naming-convention
+        path[0] = router.WETH();
+        path[1] = address(sweetToken);
+
         amounts = router.swapExactETHForTokens{value: amount}(amountOutMin, path, address(this), deadline_);
         return amounts;
     }
