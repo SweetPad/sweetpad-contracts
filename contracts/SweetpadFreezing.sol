@@ -69,6 +69,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 power = getPower(amount_, period_);
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.SWTToken);
+        _transferAssetsToContract (msg.sender, amount_, Asset.SWTToken);
     }
 
     /**
@@ -76,10 +77,11 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param amount_ Amount of tokens to freeze
      * @param period_ Period of freezing
      */
-    function freezeLP(uint256 amount_, uint256 period_) public override {
+    function freezeLP(uint256 amount_, uint256 period_) external override {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
+        _transferAssetsToContract (msg.sender, amount_, Asset.LPToken);
     }
 
     /**
@@ -110,7 +112,9 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             deadline_
         );
 
-        _freezeLPWithBNB(msg.sender, liquidity, period_, Asset.LPToken);
+        uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
+        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
+        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
     }
 
     /**
@@ -214,35 +218,14 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         totalPower[account_] += power_;
 
         emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, token_);
-        if (token_ == Asset.SWTToken) {
-            sweetToken.safeTransferFrom(account_, address(this), amount_);
-            return;
-        }
-        lpToken.safeTransferFrom(account_, address(this), amount_);
     }
 
-    // slither-disable-next-line reentrancy-benign
-    function _freezeLPWithBNB(
-        address account_,
-        uint256 amount_,
-        uint256 period_,
-        Asset token_
-    ) private {
-        uint256 power = (getPower(amount_, period_) * multiplier) / 100;
-        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        freezeInfo[account_].push(
-            FreezeInfo({
-                frozenUntil: block.number + period_,
-                period: period_,
-                frozenAmount: amount_,
-                power: power,
-                token: token_
-            })
-        );
-        totalPower[account_] += power;
-
-        // slither-disable-next-line reentrancy-events
-        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power, token_);
+    function _transferAssetsToContract (address from, uint256 amount, Asset token) private {
+        if (token == Asset.SWTToken) {
+            sweetToken.safeTransferFrom(from, address(this), amount);
+            return;
+        }
+        lpToken.safeTransferFrom(from, address(this), amount);
     }
 
     function _unfreezeSWT(
@@ -270,10 +253,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         lpToken.safeTransfer(account_, amount);
     }
-
-    function _trunsferUnusedBNB(address to, uint256 amount) private {}
-
-    function _trunsferUnusedSWT(address to, uint256 amount) private {}
 
     function _transferBackUnusedAssets(
         address to,
