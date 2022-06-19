@@ -25,7 +25,7 @@ const setupFixture = createFixture(async () => {
 	return [sweetpadFreezing, sweetToken, router, factory, weth];
 });
 
-describe("SweetpadFreezing", function () {
+describe("SweetpadFreezingFork", function () {
 	let deployer, caller, sweetpadFreezing, sweetToken, router, factory, weth, lpAddress, lp;
 
 	before("Before All: ", async function () {
@@ -65,6 +65,23 @@ describe("SweetpadFreezing", function () {
 	});
 
 	describe("Freeze LP with BNB", function () {
+		it("Should revert if lp setted incorrect and user tryes to freeze", async function () {
+			await sweetpadFreezing.setLPToken("0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168");
+			await expect(sweetpadFreezing
+				.connect(caller)
+				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+					value: ethers.utils.parseUnits("100")
+				})).to.be.revertedWith("SweetpadFreezing: Wrong LP");
+		});
+
+		it("Should revert if power is less than 10000 xSWT", async function () {
+			await expect(sweetpadFreezing
+				.connect(caller)
+				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+					value: ethers.utils.parseUnits("1")
+				})).to.be.revertedWith("SweetpadFreezing: At least 10.000 xSWT is required");
+		});
+
 		it("freezeWithBNB function ", async function () {
 			const callerETHBalance = await ethers.provider.getBalance(caller.address);
 

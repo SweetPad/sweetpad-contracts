@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "ApeSwap-AMM-Periphery/contracts/interfaces/IApeRouter02.sol";
 import "ApeSwap-AMM-Periphery/contracts/interfaces/IApePair.sol";
 import "./interfaces/ISweetpadFreezing.sol";
+import "hardhat/console.sol";
 
 /**
  * @title SweetpadFreezing
@@ -87,7 +88,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param period_ Period of freezing
      * @param deadline_ Timestamp after which the transaction will revert.
      */
-    // slither-disable-next-line reentrancy-benign
     function freezeWithBNB(
         uint256 period_,
         uint256 amountOutMin,
@@ -97,7 +97,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     ) external payable {
         IApePair lp = IApePair(address(lpToken));
 
-        require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "Wrong LP");
+        require((lp.token0() == router.WETH()) || (lp.token1() == router.WETH()), "SweetpadFreezing: Wrong LP");
 
         IERC20 token = IERC20(lp.token0());
 
@@ -112,12 +112,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         path[1] = address(token);
 
         // slither-disable-next-line reentrancy-events
-        uint256[] memory swapResult = _swapExactETHForTokens(
-            msg.value / 2,
-            amountOutMin,
-            path,
-            deadline_
-        );
+        uint256[] memory swapResult = _swapExactETHForSwtTokens(msg.value / 2, amountOutMin, path, deadline_);
 
         uint256 tokenAmount = swapResult[1];
 
@@ -125,25 +120,24 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         token.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
         // slither-disable-next-line reentrancy-events
-        (, , uint256 lpResult) = router.addLiquidityETH{value: msg.value / 2}(
+        (uint256 amountToken, uint256 amountETH, uint256 liquidity) = _addLiquidityETH(
+            msg.value / 2,
             address(token),
             tokenAmount,
             amountTokenMin,
             amountETHMin,
-            address(this),
             deadline_
         );
-        _freezeLPWithBNB(msg.sender, lpResult, period_, Asset.LPToken);
-    }
+        
+        if (msg.value / 2 - amountETH > 0) {
+            _trunsferUnusedBNB(msg.sender, msg.value / 2 - amountETH);
+        }
 
-    function _swapExactETHForTokens(
-        uint256 amount,
-        uint256 amountOutMin,
-        address[] memory path,
-        uint256 deadline_
-    ) private returns (uint256[] memory amounts) {
-        amounts = router.swapExactETHForTokens{value: amount}(amountOutMin, path, address(this), deadline_);
-        return amounts;
+        if(tokenAmount - amountToken > 0) {
+            _trunsferUnusedSWT(msg.sender, tokenAmount - amountToken);
+        }
+
+        _freezeLPWithBNB(msg.sender, liquidity, period_, Asset.LPToken);
     }
 
     /**
@@ -263,7 +257,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     ) private {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        // slither-disable-next-line reentrancy-benign
         freezeInfo[account_].push(
             FreezeInfo({
                 frozenUntil: block.number + period_,
@@ -273,7 +266,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
                 token: token_
             })
         );
-        // slither-disable-next-line reentrancy-benign
         totalPower[account_] += power;
 
         // slither-disable-next-line reentrancy-events
@@ -304,5 +296,48 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         emit UnFreeze(id_, account_, amount, Asset.LPToken);
 
         lpToken.safeTransfer(account_, amount);
+    }
+
+    function _trunsferUnusedBNB(address to, uint256 amount) private {
+        payable(to).transfer(amount);
+    }
+    function _trunsferUnusedSWT(address to, uint256 amount) private {
+        sweetToken.safeTransfer(to, amount);
+    }
+
+    function _addLiquidityETH(
+        uint256 amount,
+        address token,
+        uint256 tokenAmount,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        uint256 deadline_
+    )
+        private
+        returns (
+            uint256 amountToken,
+            uint256 amountETH,
+            uint256 liquidity
+        )
+    {
+        (amountToken, amountETH, liquidity) = router.addLiquidityETH{value: amount}(
+            token,
+            tokenAmount,
+            amountTokenMin,
+            amountETHMin,
+            address(this),
+            deadline_
+        );
+        return (amountToken, amountETH, liquidity);
+    }
+
+    function _swapExactETHForSwtTokens(
+        uint256 amount,
+        uint256 amountOutMin,
+        address[] memory path,
+        uint256 deadline_
+    ) private returns (uint256[] memory amounts) {
+        amounts = router.swapExactETHForTokens{value: amount}(amountOutMin, path, address(this), deadline_);
+        return amounts;
     }
 }
