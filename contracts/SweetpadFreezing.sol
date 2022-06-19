@@ -8,7 +8,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "ApeSwap-AMM-Periphery/contracts/interfaces/IApeRouter02.sol";
 import "ApeSwap-AMM-Periphery/contracts/interfaces/IApePair.sol";
 import "./interfaces/ISweetpadFreezing.sol";
-import "hardhat/console.sol";
 
 /**
  * @title SweetpadFreezing
