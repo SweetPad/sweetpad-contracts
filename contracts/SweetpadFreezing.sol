@@ -100,9 +100,6 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 tokenAmount = swapResult[1];
 
         // slither-disable-next-line reentrancy-events
-        sweetToken.safeApprove(ROUTER_ADDRESS, tokenAmount);
-
-        // slither-disable-next-line reentrancy-events
         (uint256 amountToken, uint256 amountETH, uint256 liquidity) = _addLiquidityETH(
             msg.value / 2,
             address(sweetToken),
@@ -111,12 +108,12 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             amountETHMin,
             deadline_
         );
-        
+
         if (msg.value / 2 - amountETH > 0) {
             _trunsferUnusedBNB(msg.sender, msg.value / 2 - amountETH);
         }
 
-        if(tokenAmount - amountToken > 0) {
+        if (tokenAmount - amountToken > 0) {
             _trunsferUnusedSWT(msg.sender, tokenAmount - amountToken);
         }
 
@@ -284,6 +281,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function _trunsferUnusedBNB(address to, uint256 amount) private {
         payable(to).transfer(amount);
     }
+
     function _trunsferUnusedSWT(address to, uint256 amount) private {
         sweetToken.safeTransfer(to, amount);
     }
@@ -303,6 +301,9 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
             uint256 liquidity
         )
     {
+        // slither-disable-next-line reentrancy-events
+        sweetToken.safeApprove(ROUTER_ADDRESS, tokenAmount);
+
         (amountToken, amountETH, liquidity) = router.addLiquidityETH{value: amount}(
             token,
             tokenAmount,
