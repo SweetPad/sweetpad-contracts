@@ -4,7 +4,6 @@
 	"scripts": {
 		"compile": "npx hardhat compile",
 		"test": "npx hardhat test test/unit/*.js",
-		"test:fork": "IS_FORKING=true npx hardhat test test/forking/*.js",
 		"test:stage": "DEPLOY_ENV=stage npx hardhat test test/deploy-scripts/stageDeploy.test.js",
 		"test:prod": "DEPLOY_ENV=prod npx hardhat test test/deploy-scripts/prodDeploy.test.js",
 		"coverage": "npx hardhat coverage",

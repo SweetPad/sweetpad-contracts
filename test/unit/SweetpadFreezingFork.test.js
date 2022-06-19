@@ -26,7 +26,11 @@ const setupFixture = createFixture(async () => {
 });
 
 describe("SweetpadFreezingFork", function () {
-	let deployer, caller, sweetpadFreezing, sweetToken, router, factory, weth, lpAddress, lp;
+	let deployer, caller, sweetpadFreezing, sweetToken, router, factory, weth, lpAddress, lp, oneYear;
+
+	const daysToBlocks = async (days) => {
+		return (await sweetpadFreezing.getBlocksPerDay()).mul(days);
+	};
 
 	before("Before All: ", async function () {
 		[deployer, caller] = await Promise.all(
@@ -42,6 +46,7 @@ describe("SweetpadFreezingFork", function () {
 
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, router, factory, weth] = await setupFixture();
+		oneYear = await daysToBlocks(10);
 		await sweetpadFreezing.setMultiplier(250);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 		await sweetToken.connect(deployer).approve(router.address, ethers.utils.parseUnits("10000000"));
@@ -69,7 +74,7 @@ describe("SweetpadFreezingFork", function () {
 			await sweetpadFreezing.setLPToken("0x5777d92f208679DB4b9778590Fa3CAB3aC9e2168");
 			await expect(sweetpadFreezing
 				.connect(caller)
-				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
 					value: ethers.utils.parseUnits("100")
 				})).to.be.revertedWith("SweetpadFreezing: Wrong LP");
 		});
@@ -77,7 +82,7 @@ describe("SweetpadFreezingFork", function () {
 		it("Should revert if power is less than 10000 xSWT", async function () {
 			await expect(sweetpadFreezing
 				.connect(caller)
-				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
 					value: ethers.utils.parseUnits("1")
 				})).to.be.revertedWith("SweetpadFreezing: At least 10.000 xSWT is required");
 		});
@@ -87,7 +92,7 @@ describe("SweetpadFreezingFork", function () {
 
 			const tx = await sweetpadFreezing
 				.connect(caller)
-				.freezeWithBNB(3650, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
 					value: ethers.utils.parseUnits("100")
 				});
 
@@ -100,8 +105,8 @@ describe("SweetpadFreezingFork", function () {
 
 			expect(await sweetpadFreezing.totalPower(caller.address)).to.equal(generatedLP.mul(5));
 			expect(await sweetpadFreezing.freezeInfo(caller.address, 0)).to.eql([
-				BigNumber.from(tx.blockNumber).add(3650),
-				BigNumber.from(3650),
+				BigNumber.from(tx.blockNumber).add(oneYear),
+				BigNumber.from(oneYear),
 				BigNumber.from(generatedLP),
 				BigNumber.from(generatedLP).mul(5),
 				1

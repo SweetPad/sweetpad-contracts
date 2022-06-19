@@ -19,19 +19,6 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm run test
-
-  forking-test:
-    name: forking test
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '14'
-      - uses: actions/checkout@v2
-      - name: Install Dependecies
-        run: npm install
-      - name: Run Forking tests
-        run: npm run test:fork
   
   deploy-test:
     name: deploy-test
