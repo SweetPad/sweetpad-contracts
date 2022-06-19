@@ -221,11 +221,11 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     }
 
     function _transferAssetsToContract (address from, uint256 amount, Asset token) private {
-        if (token == Asset.SWTToken) {
-            sweetToken.safeTransferFrom(from, address(this), amount);
-            return;
+        IERC20 asset = sweetToken;
+        if (token == Asset.LPToken) {
+            asset = lpToken;
         }
-        lpToken.safeTransferFrom(from, address(this), amount);
+        asset.safeTransferFrom(from, address(this), amount);
     }
 
     function _unfreezeSWT(
