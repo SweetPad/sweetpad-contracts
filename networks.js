@@ -13,9 +13,9 @@ module.exports = {
 		hardhat: {
 			chainId: 31337,
 			forking: {
-				enabled: false,
-				url: `https://bsc.getblock.io/mainnet/?api_key=${FORKING_API_KEY}`,
-				blockNumber: 17827763
+				enabled: true,
+				url: "https://eth-mainnet.alchemyapi.io/v2/i3Ma_NT_hL2_Uef_Q6FYVyYkAlQIzFtR",
+				blockNumber: 14938317
 			},
 			accounts: {
 				mnemonic: "decide sphere amateur six misery tattoo happy cluster indoor topple clerk message",
@@ -68,7 +68,7 @@ module.exports = {
 			url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
 			tags: ["stage"],
 			deploy: ["./deploy/stage"]
-		},
+		}
 	},
 	defaultConfig: {
 		gasPrice: "auto"

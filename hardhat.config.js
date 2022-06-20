@@ -105,7 +105,7 @@ module.exports = {
 		runOnCompile: false
 	},
 	dependencyCompiler: {
-		paths: ["@openzeppelin/contracts/token/ERC20/IERC20.sol"],
+		paths: ["ApeSwap-AMM-Periphery/contracts/interfaces/IApeFactory.sol"],
 		keep: HARDHAT_DEPENDENCY_COMPILER_KEEP
 	},
 	docgen: {

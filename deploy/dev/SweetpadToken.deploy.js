@@ -10,7 +10,16 @@ module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, get
 
 	const sweetpadToken = await getContract("SweetpadToken");
 
-	return sweetpadToken;
+	await deploy("lpToken", {
+		from: deployer.address,
+		contract: "SweetpadToken",
+		args: [],
+		log: true,
+	});
+
+	const lpToken = await getContract("lpToken");
+
+	return [lpToken, sweetpadToken];
 };
 
 module.exports.tags = ["SweetpadToken", "dev"];

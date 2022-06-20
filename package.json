@@ -18,7 +18,7 @@
 		"solhint": "solhint contracts/**/*.sol",
 		"size-contracts": "npx hardhat size-contracts",
 		"prettier:solidity": "./node_modules/.bin/prettier --write 'contracts/**/*.sol'",
-		"slither": "HARDHAT_DEPENDENCY_COMPILER_KEEP=true slither . --filter-paths \"node_modules/@chainlink|node_modules/@openzeppelin|node_modules/@uniswap|contracts/mocks|contracts/hardhat-dependency-compiler\" --solc-remaps \"@chainlink/=$(pwd)/node_modules/@chainlink/ @openzeppelin/=$(pwd)/node_modules/@openzeppelin/ @uniswap/=$(pwd)/node_modules/@uniswap/\" && rm -rf contracts/hardhat-dependency-compiler",
+		"slither": "HARDHAT_DEPENDENCY_COMPILER_KEEP=true slither . --exclude reentrancy-benign --filter-paths \"node_modules/@chainlink|node_modules/@openzeppelin|node_modules/ApeSwap-AMM-Periphery|contracts/mocks|contracts/hardhat-dependency-compiler\" --solc-remaps \"@chainlink/=$(pwd)/node_modules/@chainlink/ @openzeppelin/=$(pwd)/node_modules/@openzeppelin/ ApeSwap-AMM-Periphery/=$(pwd)/node_modules/ApeSwap-AMM-Periphery/\" && rm -rf contracts/hardhat-dependency-compiler",
 		"prepare": "husky install"
 	},
 	"devDependencies": {
@@ -71,8 +71,7 @@
 		"web3": "^1.7.3"
 	},
 	"dependencies": {
-		"@uniswap/v2-core": "^1.0.1",
-		"@uniswap/v2-periphery": "^1.1.0-beta.0",
+		"ApeSwap-AMM-Periphery": "git+https://github.com/ApeSwapFinance/apeswap-swap-periphery.git",
 		"ethereumjs-util": "^7.1.4",
 		"hardhat-local-networks-config-plugin": "^0.0.6",
 		"web3-utils": "^1.7.3"
