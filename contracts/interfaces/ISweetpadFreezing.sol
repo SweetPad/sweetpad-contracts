@@ -59,5 +59,5 @@ interface ISweetpadFreezing {
     /// @notice Emitted when tokens are unFrozen
     event UnFreeze(uint256 id, address indexed account, uint256 power, Asset);
     /// @notice Emmited when multiplier reseted
-    event MultiplierReseted(uint256 multiplier);
+    event MultiplierReseted(uint256 oldMultiplier, uint256 newMultiplier);
 }

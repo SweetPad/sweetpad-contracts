@@ -84,8 +84,11 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     }
 
     /**
-     * @notice Freeze LP tokens
+     * @notice Transfer BNB to contract and Freeze LP 
      * @param period_ Period of freezing
+     * @param amountOutMin The minimum amount of output tokens while swaping
+     * @param amountTokenMin Min token amount desiered while adding liquidity
+     * @param amountETHMin Min ETH amount desiered while adding liquidity
      * @param deadline_ Timestamp after which the transaction will revert.
      */
     function freezeWithBNB(
@@ -152,9 +155,10 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param multiplier_ Shows how many times the power will be greater for  user while staking with LP
      */
     function setMultiplier(uint256 multiplier_) external override onlyOwner {
+        uint256 oldMultiplier = multiplier;
         require(multiplier_ != 0, "SweetpadFreezing: Multiplier can't be zero");
         multiplier = multiplier_;
-        emit MultiplierReseted(multiplier);
+        emit MultiplierReseted(oldMultiplier, multiplier);
     }
 
     /**
@@ -243,7 +247,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     }
 
     function _unfreezeLP(address account_, uint256 id_) private {
-        FreezeInfo storage freezeData = freezeInfo[account_][id_];
+        FreezeInfo memory freezeData = freezeInfo[account_][id_];
         totalPower[account_] -= freezeData.power;
         uint256 amount = freezeData.frozenAmount;
         delete freezeInfo[account_][id_];
