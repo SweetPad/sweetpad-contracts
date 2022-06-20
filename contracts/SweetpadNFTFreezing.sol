@@ -10,9 +10,9 @@ import "./interfaces/ISweetpadTicket.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
-    uint256 private constant BLOCKS_PER_DAY = 10; // TODO for mainnet change to 28674
-    uint256 private constant MIN_PERIOD = 182 * BLOCKS_PER_DAY;
-    uint256 private constant MAX_PERIOD = 1095 * BLOCKS_PER_DAY;
+    uint256 private constant BLOCKS_PER_DAY = 1; // TODO for mainnet change to 28674
+    uint256 private constant MIN_PERIOD = 50 * BLOCKS_PER_DAY;
+    uint256 private constant MAX_PERIOD = 300 * BLOCKS_PER_DAY;
 
     ISweetpadNFT public override nft;
     ISweetpadTicket public override ticket;
