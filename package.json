@@ -3,7 +3,7 @@
 	"license": "MIT",
 	"scripts": {
 		"compile": "npx hardhat compile",
-		"test": "npx hardhat test test/unit/*.js",
+		"test": "npx hardhat test",
 		"test:stage": "DEPLOY_ENV=stage npx hardhat test test/deploy-scripts/stageDeploy.test.js",
 		"test:prod": "DEPLOY_ENV=prod npx hardhat test test/deploy-scripts/prodDeploy.test.js",
 		"coverage": "npx hardhat coverage",
@@ -71,8 +71,6 @@
 		"web3": "^1.7.3"
 	},
 	"dependencies": {
-		"@uniswap/v2-core": "^1.0.1",
-		"@uniswap/v2-periphery": "^1.1.0-beta.0",
 		"ApeSwap-AMM-Periphery": "git+https://github.com/ApeSwapFinance/apeswap-swap-periphery.git",
 		"ethereumjs-util": "^7.1.4",
 		"hardhat-local-networks-config-plugin": "^0.0.6",
