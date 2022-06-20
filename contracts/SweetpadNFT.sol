@@ -26,6 +26,9 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     mapping(uint256 => Tier) public override idToTier;
     mapping(Tier => uint256) public override tierToBoost;
 
+    /// @dev Array of user NFTs
+    mapping(address => uint256[]) public userNFTs;
+
     /**
      * @notice Initialize contract
      */
@@ -78,6 +81,9 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
         bytes memory data_
     ) external {
         _safeTransfer(msg.sender, to_, id_, data_);
+
+        popNFT(msg.sender, id_);
+        pushNFT(to_, id_);
     }
 
     /**
@@ -93,6 +99,9 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     ) external {
         for (uint256 i = 0; i < ids_.length; i++) {
             _safeTransfer(msg.sender, to_, ids_[i], data_);
+
+            popNFT(msg.sender, ids_[i]);
+            pushNFT(to_, ids_[i]);
         }
     }
 
@@ -111,6 +120,9 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     ) external override {
         for (uint256 i = 0; i < ids_.length; i++) {
             safeTransferFrom(from_, to_, ids_[i], data_);
+
+            popNFT(from_, ids_[i]);
+            pushNFT(to_, ids_[i]);
         }
     }
 
@@ -142,6 +154,13 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
             _exists(tokenId_) ? string(abi.encodePacked(_baseURI(), Strings.toString(tokenId_), ".json")) : _baseURI();
     }
 
+    /**
+     * @notice Returns user NFTs 
+     */
+    function getUserNfts(address user) external view override returns (uint256[] memory) {
+        return userNFTs[user];
+    }
+
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
@@ -157,6 +176,28 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
         _safeMint(account_, id);
         idToTier[id] = tier_;
 
+        pushNFT(account_, id);
+
         emit Create(id, tier_, account_);
+    }
+
+    function pushNFT(address user, uint256 nftId) internal {
+        userNFTs[user].push(nftId);
+    }
+
+    function popNFT(address user, uint256 nftId) internal {
+        uint256[] memory _userNFTs = userNFTs[user];
+        uint256 len = _userNFTs.length;
+
+        for (uint256 i = 0; i < len; i++) {
+            if (_userNFTs[i] == nftId) {
+                if (i != len - 1) {
+                    userNFTs[user][i] = userNFTs[user][len - 1];
+                }
+                userNFTs[user].pop();
+
+                break;
+            }
+        }
     }
 }

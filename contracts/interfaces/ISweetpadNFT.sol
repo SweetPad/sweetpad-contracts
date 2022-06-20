@@ -19,6 +19,8 @@ interface ISweetpadNFT is IERC721, IERC721Metadata {
 
     function getTicketsQuantityByIds(uint256[] calldata) external view returns (uint256[] calldata);
 
+    function getUserNfts(address) external view returns (uint256[] memory);
+
     function setBaseURI(string memory) external;
 
     function currentID() external view returns (uint256);

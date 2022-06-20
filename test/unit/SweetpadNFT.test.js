@@ -48,8 +48,25 @@ describe("SweetpadNFT", function () {
 	describe("safeTransfer", function () {
 		it("Should Transfer correctly", async function () {
 			await sweetpadNFT.safeMint(holder.address, 0);
-			await sweetpadNFT.connect(holder).safeTransfer(owner.address, 1, "0x00");
-			expect(await sweetpadNFT.ownerOf(1)).to.equal(owner.address);
+			await sweetpadNFT.safeMint(holder.address, 0);
+			await sweetpadNFT.safeMint(holder.address, 0);
+
+			expect(await sweetpadNFT.getUserNfts(holder.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(2),
+				BigNumber.from(3)
+			]);
+
+			await sweetpadNFT.connect(holder).safeTransfer(owner.address, 2, "0x00");
+
+			expect(await sweetpadNFT.ownerOf(2)).to.equal(owner.address);
+			expect(await sweetpadNFT.getUserNfts(holder.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(3)
+			]);
+			expect(await sweetpadNFT.getUserNfts(owner.address)).to.eql([
+				BigNumber.from(2),
+			]);
 		});
 	});
 
@@ -78,13 +95,30 @@ describe("SweetpadNFT", function () {
 		it("Should safeBatchTransferFrom correctly", async function () {
 			await sweetpadNFT.safeMint(holder.address, 0);
 			await sweetpadNFT.safeMint(holder.address, 1);
+			await sweetpadNFT.safeMint(holder.address, 1);
+			await sweetpadNFT.safeMint(holder.address, 1);
+
+			expect(await sweetpadNFT.getUserNfts(holder.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(2),
+				BigNumber.from(3),
+				BigNumber.from(4)
+			]);
 
 			await sweetpadNFT.connect(holder).setApprovalForAll(caller.address, true);
 
-			await sweetpadNFT.connect(caller).safeBatchTransferFrom(holder.address, owner.address, [1, 2], "0x00");
+			await sweetpadNFT.connect(caller).safeBatchTransferFrom(holder.address, owner.address, [1, 4], "0x00");
 
 			expect(await sweetpadNFT.ownerOf(1)).to.equal(owner.address);
-			expect(await sweetpadNFT.ownerOf(2)).to.equal(owner.address);
+			expect(await sweetpadNFT.ownerOf(4)).to.equal(owner.address);
+			expect(await sweetpadNFT.getUserNfts(holder.address)).to.eql([
+				BigNumber.from(3),
+				BigNumber.from(2)
+			]);
+			expect(await sweetpadNFT.getUserNfts(owner.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(4)
+			]);
 		});
 	});
 
@@ -113,6 +147,14 @@ describe("SweetpadNFT", function () {
 			expect(await sweetpadNFT.idToTier(1)).to.equal(0);
 			expect(await sweetpadNFT.idToTier(2)).to.equal(1);
 			expect(await sweetpadNFT.idToTier(4)).to.equal(1);
+			expect(await sweetpadNFT.getUserNfts(holder.address)).to.eql([
+				BigNumber.from(1),
+				BigNumber.from(2)
+			]);
+			expect(await sweetpadNFT.getUserNfts(owner.address)).to.eql([
+				BigNumber.from(3),
+				BigNumber.from(4)
+			]);
 		});
 	});
 
