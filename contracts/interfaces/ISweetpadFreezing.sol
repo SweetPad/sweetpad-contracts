@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "ApeSwap-AMM-Periphery/contracts/interfaces/IApeRouter02.sol";
 
 interface ISweetpadFreezing {
     enum Asset {
@@ -30,6 +31,10 @@ interface ISweetpadFreezing {
 
     function lpToken() external view returns (IERC20);
 
+    function router() external view returns (IApeRouter02);
+
+    function busd() external view returns (IERC20);
+
     function multiplier() external view returns (uint256);
 
     function getBlocksPerDay() external pure returns (uint256);
@@ -44,11 +49,31 @@ interface ISweetpadFreezing {
 
     function freezeLP(uint256, uint256) external;
 
+    function freezeWithBNB(
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256
+    ) external payable;
+
+    function freezeWithBUSD(
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256,
+        uint256
+    ) external;
+
     function unfreezeSWT(uint256, uint256) external;
 
     function unfreezeLP(uint256) external;
 
     function setMultiplier(uint256) external;
+
+    function setLPToken(IERC20) external;
 
     function getFreezes(address) external view returns (FreezeInfo[] memory);
 

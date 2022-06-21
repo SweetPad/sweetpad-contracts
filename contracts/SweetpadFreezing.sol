@@ -2,10 +2,8 @@
 
 pragma solidity ^0.8.7;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "ApeSwap-AMM-Periphery/contracts/interfaces/IApeRouter02.sol";
 import "./interfaces/ISweetpadFreezing.sol";
 
 /**
@@ -29,6 +27,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     // TODO set correct mainnet addresses before deploying
     address public constant ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
 
+    address public constant BUSD_ADDRESS = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+
     /// @dev Multiplier to colculate power while freezing with LP
     uint256 public override multiplier;
 
@@ -40,8 +40,9 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
     IERC20 public override sweetToken;
     IERC20 public override lpToken;
+    IERC20 public override busd = IERC20(BUSD_ADDRESS);
 
-    IApeRouter02 public router = IApeRouter02(ROUTER_ADDRESS);
+    IApeRouter02 public override router = IApeRouter02(ROUTER_ADDRESS);
 
     /**
      * @notice Initialize contract
@@ -68,7 +69,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 power = getPower(amount_, period_);
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.SWTToken);
-        _transferAssetsToContract (msg.sender, amount_, Asset.SWTToken);
+        _transferAssetsToContract(msg.sender, amount_, Asset.SWTToken);
     }
 
     /**
@@ -80,11 +81,11 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
-        _transferAssetsToContract (msg.sender, amount_, Asset.LPToken);
+        _transferAssetsToContract(msg.sender, amount_, Asset.LPToken);
     }
 
     /**
-     * @notice Transfer BNB to contract and Freeze LP 
+     * @notice Transfer BNB to contract and Freeze LP
      * @param period_ Period of freezing
      * @param amountOutMin The minimum amount of output tokens while swaping
      * @param amountTokenMin Min token amount desiered while adding liquidity
@@ -97,7 +98,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amountTokenMin,
         uint256 amountETHMin,
         uint256 deadline_
-    ) external payable {
+    ) external override payable {
         // slither-disable-next-line reentrancy-events
         uint256[] memory swapResult = _swapExactETHForSwtTokens(msg.value / 2, amountOutMin, deadline_);
 
@@ -107,6 +108,40 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 liquidity = _addLiquidityETH(
             msg.sender,
             msg.value / 2,
+            address(sweetToken),
+            tokenAmount,
+            amountTokenMin,
+            amountETHMin,
+            deadline_
+        );
+
+        uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
+        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
+        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
+    }
+
+    function freezeWithBUSD(
+        uint256 amount,
+        uint256 amountOutMinBUSD,
+        uint256 amountOutMinSWT,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        uint256 period_,
+        uint256 deadline_
+    ) external override {
+        busd.safeTransferFrom(msg.sender, address(this), amount);
+        busd.safeApprove(ROUTER_ADDRESS, amount);
+
+        uint256[] memory swapResult = _swapExactTokensForETH(amount, amountOutMinBUSD, deadline_);
+        uint256 bnbAmount = swapResult[1];
+
+        swapResult = _swapExactETHForSwtTokens(bnbAmount / 2, amountOutMinSWT, deadline_);
+        
+        uint256 tokenAmount = swapResult[1];
+
+        uint256 liquidity = _addLiquidityETH(
+            msg.sender,
+            bnbAmount / 2,
             address(sweetToken),
             tokenAmount,
             amountTokenMin,
@@ -165,7 +200,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @notice Set LP token
      * @param lpToken_ Address of BNB/SWT LP
      */
-    function setLPToken(IERC20 lpToken_) external onlyOwner {
+    function setLPToken(IERC20 lpToken_) external override onlyOwner {
         require(address(lpToken_) != address(0), "SweetpadFreezing: LP token address cant be Zero address");
         lpToken = lpToken_;
     }
@@ -223,7 +258,11 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, token_);
     }
 
-    function _transferAssetsToContract (address from, uint256 amount, Asset token) private {
+    function _transferAssetsToContract(
+        address from,
+        uint256 amount,
+        Asset token
+    ) private {
         IERC20 asset = sweetToken;
         if (token == Asset.LPToken) {
             asset = lpToken;
@@ -284,23 +323,13 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amountTokenMin,
         uint256 amountETHMin,
         uint256 deadline_
-    )
-        private
-        returns (
-            uint256
-        )
-    {
+    ) private returns (uint256) {
         // slither-disable-next-line reentrancy-events
         sweetToken.safeApprove(ROUTER_ADDRESS, tokenAmount);
 
-        (uint256 amountTokenAdded, uint256 amountETHAdded, uint256 liquidity) = router.addLiquidityETH{value: ethAmount}(
-            token,
-            tokenAmount,
-            amountTokenMin,
-            amountETHMin,
-            address(this),
-            deadline_
-        );
+        (uint256 amountTokenAdded, uint256 amountETHAdded, uint256 liquidity) = router.addLiquidityETH{
+            value: ethAmount
+        }(token, tokenAmount, amountTokenMin, amountETHMin, address(this), deadline_);
 
         _transferBackUnusedAssets(account, ethAmount, tokenAmount, amountETHAdded, amountTokenAdded);
 
@@ -319,6 +348,20 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         path[1] = address(sweetToken);
 
         amounts = router.swapExactETHForTokens{value: amount}(amountOutMin, path, address(this), deadline_);
+        return amounts;
+    }
+
+    function _swapExactTokensForETH(
+        uint256 amount_,
+        uint256 amountOutMin_,
+        uint256 deadline_
+    ) private returns (uint256[] memory amounts) {
+        address[] memory path = new address[](2);
+
+        // slither-disable-next-line naming-convention
+        path[0] = BUSD_ADDRESS;
+        path[1] = router.WETH();
+        amounts = router.swapExactTokensForETH(amount_, amountOutMin_, path, address(this), deadline_);
         return amounts;
     }
 }
