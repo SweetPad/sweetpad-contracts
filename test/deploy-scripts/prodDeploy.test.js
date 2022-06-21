@@ -21,12 +21,12 @@ describe("ProdDeploy", function () {
 
 	it("SweetpadFreezing", async function () {
 		expect(await sweetpadFreezing.sweetToken()).to.equal(sweetpadToken);
-		expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(10);
+		expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(1);
 		expect(await sweetpadFreezing.getMinFreezePeriod()).to.equal(
-			(await sweetpadFreezing.getBlocksPerDay()).mul(182)
+			(await sweetpadFreezing.getBlocksPerDay()).mul(5)
 		);
 		expect(await sweetpadFreezing.getMaxFreezePeriod()).to.equal(
-			(await sweetpadFreezing.getBlocksPerDay()).mul(1095)
+			(await sweetpadFreezing.getBlocksPerDay()).mul(30)
 		);
 		// TODO check owner
 	});
