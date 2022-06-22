@@ -125,6 +125,9 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         busd.safeApprove(ROUTER_ADDRESS, amount);
 
         uint256[] memory swapResult = _swapExactTokensForETH(amount, amountOutMinBUSD, deadline_);
+
+        busd.safeApprove(ROUTER_ADDRESS, 0);
+        
         uint256 bnbAmount = swapResult[1];
 
         _freezeWithBNB(bnbAmount, period_, amountOutMinSWT, amountTokenMin, amountETHMin, deadline_);
