@@ -310,6 +310,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         _transferBackUnusedAssets(account, ethAmount, tokenAmount, amountETHAdded, amountTokenAdded);
 
+        sweetToken.safeApprove(ROUTER_ADDRESS, 0);
+
         return liquidity;
     }
 
