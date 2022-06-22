@@ -168,7 +168,7 @@ describe("SweetpadFreezingFork", function () {
 			).to.be.revertedWith("SweetpadFreezing: At least 10.000 xSWT is required");
 		});
 
-		it("freezeWithBNB function ", async function () {
+		it("freezeWithBUSD function ", async function () {
 			const busdBalance = await busd.balanceOf(deployer.address);
 
 			await busd.connect(deployer).approve(sweetpadFreezing.address, ethers.utils.parseUnits("100000"));
