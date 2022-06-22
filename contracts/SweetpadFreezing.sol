@@ -99,28 +99,19 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amountTokenMin,
         uint256 amountETHMin,
         uint256 deadline_
-    ) external override payable {
-        // slither-disable-next-line reentrancy-events
-        uint256[] memory swapResult = _swapExactETHForSwtTokens(msg.value / 2, amountOutMin, deadline_);
-
-        uint256 tokenAmount = swapResult[1];
-
-        // slither-disable-next-line reentrancy-events
-        uint256 liquidity = _addLiquidityETH(
-            msg.sender,
-            msg.value / 2,
-            address(sweetToken),
-            tokenAmount,
-            amountTokenMin,
-            amountETHMin,
-            deadline_
-        );
-
-        uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
-        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
+    ) external payable override {
+        _freezeWithBNB(msg.value, period_, amountOutMin, amountTokenMin, amountETHMin, deadline_);
     }
 
+    /**
+     * @notice Transfer BUSD to contract and Freeze LP
+     * @param period_ Period of freezing
+     * @param amountOutMinBUSD The minimum amount of output tokens while swaping BUSD
+     * @param amountOutMinSWT The minimum amount of output tokens while swaping SWT
+     * @param amountTokenMin Min token amount desiered while adding liquidity
+     * @param amountETHMin Min ETH amount desiered while adding liquidity
+     * @param deadline_ Timestamp after which the transaction will revert.
+     */
     function freezeWithBUSD(
         uint256 amount,
         uint256 amountOutMinBUSD,
@@ -136,23 +127,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256[] memory swapResult = _swapExactTokensForETH(amount, amountOutMinBUSD, deadline_);
         uint256 bnbAmount = swapResult[1];
 
-        swapResult = _swapExactETHForSwtTokens(bnbAmount / 2, amountOutMinSWT, deadline_);
-        
-        uint256 tokenAmount = swapResult[1];
-
-        uint256 liquidity = _addLiquidityETH(
-            msg.sender,
-            bnbAmount / 2,
-            address(sweetToken),
-            tokenAmount,
-            amountTokenMin,
-            amountETHMin,
-            deadline_
-        );
-
-        uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
-        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
+        _freezeWithBNB(bnbAmount, period_, amountOutMinSWT, amountTokenMin, amountETHMin, deadline_);
     }
 
     /**
@@ -257,6 +232,35 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         totalPower[account_] += power_;
 
         emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, token_);
+    }
+
+    function _freezeWithBNB(
+        uint256 bnbAmount,
+        uint256 period_,
+        uint256 amountOutMin,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        uint256 deadline_
+    ) private {
+        // slither-disable-next-line reentrancy-events
+        uint256[] memory swapResult = _swapExactETHForSwtTokens(bnbAmount / 2, amountOutMin, deadline_);
+
+        uint256 tokenAmount = swapResult[1];
+
+        // slither-disable-next-line reentrancy-events
+        uint256 liquidity = _addLiquidityETH(
+            msg.sender,
+            bnbAmount / 2,
+            address(sweetToken),
+            tokenAmount,
+            amountTokenMin,
+            amountETHMin,
+            deadline_
+        );
+
+        uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
+        require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
+        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
     }
 
     function _transferAssetsToContract(
