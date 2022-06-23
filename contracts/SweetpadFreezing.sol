@@ -238,9 +238,14 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amount_,
         uint256 power_
     ) private {
-        totalPower[account_] -= power_;
-        freezeInfo[account_][id_].frozenAmount -= amount_;
-        freezeInfo[account_][id_].power -= power_;
+        if(amount_ == freezeInfo[account_][id_].frozenAmount){
+            totalPower[account_] -= freezeInfo[account_][id_].power;
+            delete freezeInfo[account_][id_];
+        }else{
+            totalPower[account_] -= power_;
+            freezeInfo[account_][id_].frozenAmount -= amount_;
+            freezeInfo[account_][id_].power -= power_;
+        }
 
         emit UnFreeze(id_, account_, amount_, Asset.SWTToken);
 
@@ -304,6 +309,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         );
 
         _transferBackUnusedAssets(account, ethAmount, tokenAmount, amountETHAdded, amountTokenAdded);
+
+        sweetToken.safeApprove(ROUTER_ADDRESS, 0);
 
         return liquidity;
     }
