@@ -39,7 +39,8 @@ describe("SweetpadFreezingFork", function () {
 		oneYear,
 		busdAddress,
 		busd,
-		generatedLP;
+		generatedLP,
+		lpBalance;
 
 	const daysToBlocks = async (days) => {
 		return (await sweetpadFreezing.getBlocksPerDay()).mul(days);
@@ -106,16 +107,16 @@ describe("SweetpadFreezingFork", function () {
 		});
 
 		it("freezeWithBNB function ", async function () {
-			const callerETHBalance = await ethers.provider.getBalance(caller.address);
+			let callerETHBalance = await ethers.provider.getBalance(caller.address);
 
-			const tx = await sweetpadFreezing
+			let tx = await sweetpadFreezing
 				.connect(caller)
 				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
 					value: ethers.utils.parseUnits("100")
 				});
 
-			const fee = tx.gasPrice * (await tx.wait()).gasUsed;
-			generatedLP = await lp.balanceOf(sweetpadFreezing.address);
+			let fee = tx.gasPrice * (await tx.wait()).gasUsed;
+			let generatedLP = await lp.balanceOf(sweetpadFreezing.address);
 
 			expect(await ethers.provider.getBalance(caller.address)).to.equal(
 				callerETHBalance.sub(ethers.utils.parseUnits("100").add(fee))
@@ -123,6 +124,32 @@ describe("SweetpadFreezingFork", function () {
 
 			expect(await sweetpadFreezing.totalPower(caller.address)).to.equal(generatedLP.mul(5));
 			expect(await sweetpadFreezing.freezeInfo(caller.address, 0)).to.eql([
+				BigNumber.from(tx.blockNumber).add(oneYear),
+				BigNumber.from(oneYear),
+				BigNumber.from(generatedLP),
+				BigNumber.from(generatedLP).mul(5),
+				1
+			]);
+
+			callerETHBalance = await ethers.provider.getBalance(caller.address);
+			const totalPower = await sweetpadFreezing.totalPower(caller.address);
+			lpBalance = await lp.balanceOf(sweetpadFreezing.address);
+
+			tx = await sweetpadFreezing
+				.connect(caller)
+				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+					value: ethers.utils.parseUnits("100")
+				});
+
+			fee = tx.gasPrice * (await tx.wait()).gasUsed;
+			const lpBalanceAfter = await lp.balanceOf(sweetpadFreezing.address);
+			generatedLP = lpBalanceAfter.sub(lpBalance);
+
+			expect(await ethers.provider.getBalance(caller.address)).to.equal(
+				callerETHBalance.sub(ethers.utils.parseUnits("100").add(fee))
+			);
+			expect(await sweetpadFreezing.totalPower(caller.address)).to.equal(totalPower.add(generatedLP.mul(5)));
+			expect(await sweetpadFreezing.freezeInfo(caller.address, 1)).to.eql([
 				BigNumber.from(tx.blockNumber).add(oneYear),
 				BigNumber.from(oneYear),
 				BigNumber.from(generatedLP),
@@ -143,8 +170,8 @@ describe("SweetpadFreezingFork", function () {
 				.withArgs(
 					(await sweetpadFreezing.getFreezes(deployer.address)).length - 1,
 					deployer.address,
-					BigNumber.from(generatedLP),
-					BigNumber.from(generatedLP).mul(5),
+					BigNumber.from(lpBalance),
+					BigNumber.from(lpBalance).mul(5),
 					1
 				);
 		});
