@@ -156,7 +156,7 @@ contract SweetpadNFT is ISweetpadNFT, ERC721, Ownable {
     }
 
     /**
-     * @notice Returns user NFTs 
+     * @notice Returns user NFTs
      */
     function getUserNfts(address user) external view override returns (uint256[] memory) {
         return userNFTs[user];
