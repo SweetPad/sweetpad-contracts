@@ -18,7 +18,6 @@ require("hardhat-dependency-compiler");
 require("@atixlabs/hardhat-time-n-mine");
 require("hardhat-local-networks-config-plugin");
 require("hardhat-log-remover");
-require("@tenderly/hardhat-tenderly");
 require("@nomiclabs/hardhat-web3");
 const { removeConsoleLog } = require("hardhat-preprocessor");
 
@@ -29,8 +28,6 @@ require("./tasks");
 
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY || "";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
-const TENDERLY_PROJECT = process.env.TENDERLY_PROJECT || "";
-const TENDERLY_USERNAME = process.env.TENDERLY_USERNAME || "";
 const HARDHAT_DEPENDENCY_COMPILER_KEEP = process.env.HARDHAT_DEPENDENCY_COMPILER_KEEP === "true";
 
 /**
@@ -132,10 +129,6 @@ module.exports = {
 		alphaSort: true,
 		runOnCompile: false,
 		disambiguatePaths: false
-	},
-	tenderly: {
-		project: TENDERLY_PROJECT,
-		username: TENDERLY_USERNAME
 	},
 	preprocess: {
 		eachLine: removeConsoleLog((hre) => hre.network.name !== "hardhat" && hre.network.name !== "localhost")

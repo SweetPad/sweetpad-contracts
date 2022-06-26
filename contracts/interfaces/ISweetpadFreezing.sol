@@ -6,16 +6,12 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "ApeSwap-AMM-Periphery/contracts/interfaces/IApeRouter02.sol";
 
 interface ISweetpadFreezing {
-    enum Asset {
-        SWTToken,
-        LPToken
-    }
     struct FreezeInfo {
         uint256 frozenUntil; // blockNumber when can be unfrozen
         uint256 period; // Number of blocks that tokens are frozen
         uint256 frozenAmount; // Amount of tokens are frozen
         uint256 power; // power of current frozen amount
-        Asset token; // Variable to identify if the token is SWT or LP
+        uint8 asset; // Variable to identify if the token is SWT or LP
     }
 
     function freezeInfo(address, uint256)
@@ -26,7 +22,7 @@ interface ISweetpadFreezing {
             uint256,
             uint256,
             uint256,
-            Asset
+            uint8
         );
 
     function sweetToken() external view returns (IERC20);
@@ -74,9 +70,9 @@ interface ISweetpadFreezing {
     function getPower(uint256, uint256) external pure returns (uint256);
 
     /// @notice Emitted when tokens are frozen
-    event Freeze(uint256 id, address indexed account, uint256 amount, uint256 power, Asset);
+    event Freeze(uint256 id, address indexed account, uint256 amount, uint256 power, uint8 asset);
     /// @notice Emitted when tokens are unFrozen
-    event UnFreeze(uint256 id, address indexed account, uint256 power, Asset);
+    event UnFreeze(uint256 id, address indexed account, uint256 power, uint8 asset);
     /// @notice Emmited when multiplier reseted
     event MultiplierReseted(uint256 oldMultiplier, uint256 newMultiplier);
 }

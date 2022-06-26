@@ -70,8 +70,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function freezeSWT(uint256 amount_, uint256 period_) external override {
         uint256 power = getPower(amount_, period_);
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, amount_, period_, power, Asset.SWTToken);
-        _transferAssetsToContract(msg.sender, amount_, Asset.SWTToken);
+        _freeze(msg.sender, amount_, period_, power, 0);
+        _transferAssetsToContract(msg.sender, amount_, 0);
     }
 
     /**
@@ -82,8 +82,8 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     function freezeLP(uint256 amount_, uint256 period_) external override {
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, amount_, period_, power, Asset.LPToken);
-        _transferAssetsToContract(msg.sender, amount_, Asset.LPToken);
+        _freeze(msg.sender, amount_, period_, power, 1);
+        _transferAssetsToContract(msg.sender, amount_, 1);
     }
 
     /**
@@ -119,7 +119,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         uint256 power = (getPower(liquidity, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
-        _freeze(msg.sender, liquidity, period_, power, Asset.LPToken);
+        _freeze(msg.sender, liquidity, period_, power, 1);
     }
 
     /**
@@ -129,7 +129,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      */
     function unfreezeSWT(uint256 id_, uint256 amount_) external override {
         FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
-        require(freezeData.token == Asset.SWTToken, "SweetpadFreezing: Wrong ID");
+        require(freezeData.asset == 0, "SweetpadFreezing: Wrong ID");
         require(freezeData.frozenAmount != 0, "SweetpadFreezing: Frozen amount is Zero");
         require(freezeData.frozenAmount >= amount_, "SweetpadFreezing: Insufficient frozen amount");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
@@ -148,7 +148,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      */
     function unfreezeLP(uint256 id_) external override {
         FreezeInfo memory freezeData = freezeInfo[msg.sender][id_];
-        require(freezeData.token == Asset.LPToken, "SweetpadFreezing: Wrong ID");
+        require(freezeData.asset == 1, "SweetpadFreezing: Wrong ID");
         require(block.number >= freezeData.frozenUntil, "SweetpadFreezing: Locked period dosn`t pass");
         _unfreezeLP(msg.sender, id_);
     }
@@ -210,7 +210,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         uint256 amount_,
         uint256 period_,
         uint256 power_,
-        Asset token_
+        uint8 asset_
     ) private {
         freezeInfo[account_].push(
             FreezeInfo({
@@ -218,27 +218,27 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
                 period: period_,
                 frozenAmount: amount_,
                 power: power_,
-                token: token_
+                asset: asset_
             })
         );
         totalPower[account_] += power_;
 
-        if (token_ == Asset.SWTToken) {
+        if (asset_ == 0) {
             totalFrozenSWT += amount_;
         } else {
             totalFrozenLP += amount_;
         }
 
-        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, token_);
+        emit Freeze(freezeInfo[account_].length - 1, account_, amount_, power_, asset_);
     }
 
     function _transferAssetsToContract(
         address from,
         uint256 amount,
-        Asset token
+        uint8 asset_
     ) private {
         IERC20 asset = sweetToken;
-        if (token == Asset.LPToken) {
+        if (asset_ == 1) {
             asset = lpToken;
         }
         asset.safeTransferFrom(from, address(this), amount);
@@ -261,7 +261,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
 
         totalFrozenSWT -= amount_;
 
-        emit UnFreeze(id_, account_, amount_, Asset.SWTToken);
+        emit UnFreeze(id_, account_, amount_, 0);
 
         sweetToken.safeTransfer(account_, amount_);
     }
@@ -273,7 +273,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
         delete freezeInfo[account_][id_];
         totalFrozenLP -= amount;
 
-        emit UnFreeze(id_, account_, amount, Asset.LPToken);
+        emit UnFreeze(id_, account_, amount, 1);
 
         lpToken.safeTransfer(account_, amount);
     }
