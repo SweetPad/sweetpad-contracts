@@ -71,11 +71,13 @@ describe("SweetpadFreezingFork", function () {
 
 	describe("Freeze LP with BNB", function () {
 		it("Should revert if power is less than 10000 xSWT", async function () {
-			await expect(sweetpadFreezing
-				.connect(caller)
-				.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
-					value: ethers.utils.parseUnits("1")
-				})).to.be.revertedWith("SweetpadFreezing: At least 10.000 xSWT is required");
+			await expect(
+				sweetpadFreezing
+					.connect(caller)
+					.freezeWithBNB(oneYear, 0, 0, 0, (await ethers.provider.getBlock()).timestamp + 100, {
+						value: ethers.utils.parseUnits("1")
+					})
+			).to.be.revertedWith("SweetpadFreezing: At least 10.000 xSWT is required");
 		});
 
 		it("freezeWithBNB function ", async function () {
@@ -93,6 +95,7 @@ describe("SweetpadFreezingFork", function () {
 			expect(await ethers.provider.getBalance(caller.address)).to.equal(
 				callerETHBalance.sub(ethers.utils.parseUnits("100").add(fee))
 			);
+			expect(await sweetpadFreezing.totalFrozenLP()).to.equal(BigNumber.from(generatedLP));
 
 			expect(await sweetpadFreezing.totalPower(caller.address)).to.equal(generatedLP.mul(5));
 			expect(await sweetpadFreezing.freezeInfo(caller.address, 0)).to.eql([
