@@ -34,8 +34,8 @@ describe("SweetpadFreezing", function () {
 
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, lpToken] = await setupFixture();
-		minPeriod = await daysToBlocks(5);
-		maxPeriod = await daysToBlocks(30);
+		minPeriod = await daysToBlocks(182);
+		maxPeriod = await daysToBlocks(1095);
 		await sweetpadFreezing.setMultiplier(250);
 		await sweetpadFreezing.setLPToken(lpToken.address);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));

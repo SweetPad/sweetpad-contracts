@@ -14,19 +14,18 @@ import "./interfaces/ISweetpadFreezing.sol";
 contract SweetpadFreezing is ISweetpadFreezing, Ownable {
     using SafeERC20 for IERC20;
 
-    uint16 private constant DAYS_IN_YEAR = 10;
+    uint16 private constant DAYS_IN_YEAR = 365;
 
     // TODO, we need to change BLOCKS_PER_DAY to a real one before deploying a mainnet
-    uint256 private constant BLOCKS_PER_DAY = 1;
+    uint256 private constant BLOCKS_PER_DAY = 28700;
 
     // Min period counted with blocks that user can freeze assets
-    uint256 private constant MIN_FREEZE_PERIOD = 5 * BLOCKS_PER_DAY;
+    uint256 private constant MIN_FREEZE_PERIOD = 182 * BLOCKS_PER_DAY;
 
     // Max period counted with blocks that user can freeze assets
-    uint256 private constant MAX_FREEZE_PERIOD = 30 * BLOCKS_PER_DAY;
+    uint256 private constant MAX_FREEZE_PERIOD = 1095 * BLOCKS_PER_DAY;
 
-    // TODO set correct mainnet addresses before deploying
-    address public constant ROUTER_ADDRESS = 0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
+    address public constant ROUTER_ADDRESS = 0xcF0feBd3f17CEf5b47b0cD257aCf6025c5BFf3b7;
 
     /// @dev Multiplier to colculate power while freezing with LP
     uint256 public override multiplier;
