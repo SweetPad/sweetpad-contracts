@@ -2,9 +2,9 @@ module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, get
 	const { deployer } = await getNamedSigners();
 
 	try {
-		await deploy("SweetpadToken", {
+		await deploy("SweetpadTicket", {
 			from: deployer.address,
-			contract: "SweetpadToken",
+			contract: "SweetpadTicket",
 			args: [],
 			log: true,
 		});
@@ -12,9 +12,10 @@ module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, get
 		throw error.message;
 	}
 
-	const sweetpadToken = await getContract("SweetpadToken");
 
-	return sweetpadToken;
+	const sweetpadTicket = await getContract("SweetpadTicket");
+
+	return sweetpadTicket;
 };
 
-module.exports.tags = ["SweetpadToken", "stage"];
+module.exports.tags = ["SweetpadTicket", "prod"];

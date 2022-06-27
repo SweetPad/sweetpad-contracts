@@ -19,6 +19,19 @@ jobs:
         run: npm install
       - name: Run tests
         run: npm run test
+  
+  deploy-test:
+    name: deploy-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - uses: actions/checkout@v2
+      - name: Install Dependecies
+        run: npm install
+      - name: Run deploy tests
+        run: npm run test:stage || npm run test:prod
 
   linter-check:
     name: linters Check
@@ -63,4 +76,6 @@ jobs:
       - run: pip install slither-analyzer
       - name: Install Dependecies
         run: npm install
+      - name: run slither
+        run: npm run slither
 
