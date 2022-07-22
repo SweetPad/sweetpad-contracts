@@ -71,6 +71,8 @@
 	},
 	"dependencies": {
 		"ApeSwap-AMM-Periphery": "git+https://github.com/ApeSwapFinance/apeswap-swap-periphery.git",
+		"convert-excel-to-json": "^1.7.0",
+		"ethereum-checksum-address": "0.0.8",
 		"ethereumjs-util": "^7.1.4",
 		"hardhat-local-networks-config-plugin": "^0.0.6",
 		"web3-utils": "^1.7.3"
