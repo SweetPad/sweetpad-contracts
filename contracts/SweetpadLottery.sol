@@ -12,35 +12,28 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IRandomNumberGenerator.sol";
 // Interface for Lottery NFT to mint tokens
 import "./interfaces/ISweetpadTicket.sol";
+
 // Allows for time manipulation. Set to 0x address on test/mainnet deploy
 // import "./Testable.sol";
-// Safe math 
-import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-// import "./SafeMath16.sol";
-// import "./SafeMath8.sol";
 
-// TODO rename to Lottery when done
-contract Lottery is Ownable {
-    // Libraries 
-    // Safe math
-    using SafeMath for uint256;
-    // using SafeMath16 for uint16;
-    // using SafeMath8 for uint8;
+contract SweetpadLottery is Ownable {
+    // Libraries
     // Safe ERC20
     using SafeERC20 for IERC20;
-    // Address functionality 
+    // Address functionality
     using Address for address;
 
-    // State variables 
+    // State variables
     // Instance of Cake token (collateral currency for lotto)
     // IERC20 internal cake_;
     // Storing of the NFT
-    ISweetpadTicket internal nft_;
-    // Storing of the randomness generator 
+    // TODO check
+    // ISweetpadTicket internal nft_;
+    // Storing of the randomness generator
     IRandomNumberGenerator internal randomGenerator_;
     // Request ID for random number
     bytes32 internal requestId_;
-    // Counter for lottery IDs 
+    // Counter for lottery IDs
     uint256 private lotteryIdCounter_;
 
     // Lottery size
@@ -57,22 +50,22 @@ contract Lottery is Ownable {
     // uint8 public discountForBucketThree_;
 
     // Represents the status of the lottery
-    enum Status { 
-        NotStarted,     // The lottery has not started yet
-        Open,           // The lottery is open for ticket purchases 
-        Closed,         // The lottery is no longer open for ticket purchases
-        Completed       // The lottery has been closed and the numbers drawn
+    enum Status {
+        NotStarted, // The lottery has not started yet
+        Open, // The lottery is open for ticket purchases
+        Closed, // The lottery is no longer open for ticket purchases
+        Completed // The lottery has been closed and the numbers drawn
     }
     // All the needed info around a lottery
     struct LottoInfo {
-        uint256 lotteryID;          // ID for lotto
-        Status lotteryStatus;       // Status for lotto
-        uint256 prizePoolInCake;    // The amount of cake for prize money
-        uint256 costPerTicket;      // Cost per ticket in $cake
-        uint8[] prizeDistribution;  // The distribution for prize money
-        uint256 startingTimestamp;      // Block timestamp for star of lotto
-        uint256 closingTimestamp;       // Block timestamp for end of entries
-        uint16[] winningNumbers;     // The winning numbers
+        uint256 lotteryID; // ID for lotto
+        Status lotteryStatus; // Status for lotto
+        // uint256 prizePoolInCake;    // The amount of cake for prize money
+        // uint256 costPerTicket;      // Cost per ticket in $cake
+        // uint8[] prizeDistribution;  // The distribution for prize money
+        uint256 startingTimestamp; // Block timestamp for star of lotto
+        uint256 closingTimestamp; // Block timestamp for end of entries
+        uint16[] winningNumbers; // The winning numbers
     }
     // Lottery ID's to info
     mapping(uint256 => LottoInfo) internal allLotteries_;
@@ -92,18 +85,12 @@ contract Lottery is Ownable {
 
     event RequestNumbers(uint256 lotteryId, bytes32 requestId);
 
-    event UpdatedSizeOfLottery(
-        address admin, 
-        uint8 newLotterySize
-    );
+    event UpdatedSizeOfLottery(address admin, uint8 newLotterySize);
 
-    event UpdatedMaxRange(
-        address admin, 
-        uint16 newMaxRange
-    );
+    event UpdatedMaxRange(address admin, uint16 newMaxRange);
 
     // event UpdatedBuckets(
-    //     address admin, 
+    //     address admin,
     //     uint8 bucketOneMax,
     //     uint8 bucketTwoMax,
     //     uint8 discountForBucketOne,
@@ -120,17 +107,14 @@ contract Lottery is Ownable {
     //-------------------------------------------------------------------------
 
     modifier onlyRandomGenerator() {
-        require(
-            msg.sender == address(randomGenerator_),
-            "Only random generator"
-        );
+        require(msg.sender == address(randomGenerator_), "Only random generator");
         _;
     }
 
-     modifier notContract() {
+    modifier notContract() {
         require(!address(msg.sender).isContract(), "contract not allowed");
         require(msg.sender == tx.origin, "proxy contract not allowed");
-       _;
+        _;
     }
 
     //-------------------------------------------------------------------------
@@ -138,19 +122,17 @@ contract Lottery is Ownable {
     //-------------------------------------------------------------------------
 
     constructor(
-        // address _cake, 
+        // address _cake,
         // address _timer,
         uint8 _sizeOfLotteryNumbers,
         uint16 _maxValidNumberRange,
-        address lotteryNFT_,
-        address randomNumberGenerator_
-        // uint8 _bucketOneMaxNumber,
-        // uint8 _bucketTwoMaxNumber,
-        // uint8 _discountForBucketOne,
-        // uint8 _discountForBucketTwo,
-        // uint8 _discountForBucketThree
-    ) 
-        // Testable(_timer)
+        address lotteryNFT_
+    ) // uint8 _bucketOneMaxNumber,
+    // uint8 _bucketTwoMaxNumber,
+    // uint8 _discountForBucketOne,
+    // uint8 _discountForBucketTwo,
+    // uint8 _discountForBucketThree)
+    // Testable(_timer)
     {
         // require(
         //     _bucketOneMaxNumber != 0 &&
@@ -170,22 +152,13 @@ contract Lottery is Ownable {
         //     _cake != address(0),
         //     "Contracts cannot be 0 address"
         // );
-        require(
-            _sizeOfLotteryNumbers != 0 &&
-            _maxValidNumberRange != 0,
-            "Lottery setup cannot be 0"
-        );
-        require(
-            lotteryNFT_ != address(0) &&
-            randomNumberGenerator_ != address(0),
-            "Contracts cannot be 0 address"
-        );
-        nft_ = ISweetpadTicket(lotteryNFT_);
-        randomGenerator_ = IRandomNumberGenerator(randomNumberGenerator_);
+        require(_sizeOfLotteryNumbers != 0 && _maxValidNumberRange != 0, "Lottery setup cannot be 0");
+        require(lotteryNFT_ != address(0), "Contracts cannot be 0 address");
+        // nft_ = ISweetpadTicket(lotteryNFT_);
         // cake_ = IERC20(_cake);
         sizeOfLottery_ = _sizeOfLotteryNumbers;
         maxValidRange_ = _maxValidNumberRange;
-        
+
         // bucketOneMax_ = _bucketOneMaxNumber;
         // bucketTwoMax_ = _bucketTwoMaxNumber;
         // discountForBucketOne_ = _discountForBucketOne;
@@ -196,10 +169,10 @@ contract Lottery is Ownable {
     // function initialize(
     //     address _lotteryNFT,
     //     address _IRandomNumberGenerator
-    // ) 
-    //     external 
+    // )
+    //     external
     //     initializer
-    //     onlyOwner() 
+    //     onlyOwner()
     // {
     //     require(
     //         _lotteryNFT != address(0) &&
@@ -217,10 +190,10 @@ contract Lottery is Ownable {
     // function costToBuyTickets(
     //     uint256 _lotteryId,
     //     uint256 _numberOfTickets
-    // ) 
-    //     external 
-    //     view 
-    //     returns(uint256 totalCost) 
+    // )
+    //     external
+    //     view
+    //     returns(uint256 totalCost)
     // {
     //     uint256 pricePer = allLotteries_[_lotteryId].costPerTicket;
     //     totalCost = pricePer.mul(_numberOfTickets);
@@ -229,72 +202,54 @@ contract Lottery is Ownable {
     // function costToBuyTicketsWithDiscount(
     //     uint256 _lotteryId,
     //     uint256 _numberOfTickets
-    // ) 
-    //     external 
-    //     view 
+    // )
+    //     external
+    //     view
     //     returns(
-    //         uint256 cost, 
-    //         uint256 discount, 
+    //         uint256 cost,
+    //         uint256 discount,
     //         uint256 costWithDiscount
-    //     ) 
+    //     )
     // {
     //     discount = _discount(_lotteryId, _numberOfTickets);
     //     cost = this.costToBuyTickets(_lotteryId, _numberOfTickets);
     //     costWithDiscount = cost.sub(discount);
     // }
 
-    function getBasicLottoInfo(uint256 _lotteryId) external view returns(
-        LottoInfo memory
-    )
-    {
-        return(
-            allLotteries_[_lotteryId]
-        ); 
+    function getBasicLottoInfo(uint256 _lotteryId) external view returns (LottoInfo memory) {
+        return (allLotteries_[_lotteryId]);
     }
 
-    function getMaxRange() external view returns(uint16) {
+    function getMaxRange() external view returns (uint16) {
         return maxValidRange_;
     }
 
     //-------------------------------------------------------------------------
-    // STATE MODIFYING FUNCTIONS 
+    // STATE MODIFYING FUNCTIONS
     //-------------------------------------------------------------------------
 
     //-------------------------------------------------------------------------
     // Restricted Access Functions (onlyOwner)
 
-    function updateSizeOfLottery(uint8 _newSize) external onlyOwner() {
-        require(
-            sizeOfLottery_ != _newSize,
-            "Cannot set to current size"
-        );
-        require(
-            sizeOfLottery_ != 0,
-            "Lottery size cannot be 0"
-        );
-        sizeOfLottery_ = _newSize;
-
-        emit UpdatedSizeOfLottery(
-            msg.sender, 
-            _newSize
-        );
+    function setRendomGenerator(address randomNumberGenerator_) external onlyOwner {
+        require(randomNumberGenerator_ != address(0), "Contracts cannot be 0 address");
+        randomGenerator_ = IRandomNumberGenerator(randomNumberGenerator_);
     }
 
-    function updateMaxRange(uint16 _newMaxRange) external onlyOwner() {
-        require(
-            maxValidRange_ != _newMaxRange,
-            "Cannot set to current size"
-        );
-        require(
-            maxValidRange_ != 0,
-            "Max range cannot be 0"
-        );
+    function updateSizeOfLottery(uint8 _newSize) external onlyOwner {
+        require(sizeOfLottery_ != _newSize, "Cannot set to current size");
+        require(sizeOfLottery_ != 0, "Lottery size cannot be 0");
+        sizeOfLottery_ = _newSize;
+
+        emit UpdatedSizeOfLottery(msg.sender, _newSize);
+    }
+
+    function updateMaxRange(uint16 _newMaxRange) external onlyOwner {
+        require(maxValidRange_ != _newMaxRange, "Cannot set to current size");
+        require(maxValidRange_ != 0, "Max range cannot be 0");
         maxValidRange_ = _newMaxRange;
 
-        emit UpdatedMaxRange(
-            msg.sender, 
-            _newMaxRange
-        );
+        emit UpdatedMaxRange(msg.sender, _newMaxRange);
     }
 
     // function updateBuckets(
@@ -305,7 +260,7 @@ contract Lottery is Ownable {
     //     uint8 _discountForBucketThree
     // )
     //     external
-    //     onlyOwner() 
+    //     onlyOwner()
     // {
     //     require(
     //         _bucketOneMax != 0 &&
@@ -337,23 +292,14 @@ contract Lottery is Ownable {
     //     );
     // }
 
-    function drawWinningNumbers(
-        uint256 _lotteryId, 
-        uint256 _seed
-    ) 
-        external 
-        onlyOwner() 
-    {
+    function drawWinningNumbers(uint256 _lotteryId, uint256 _seed) external onlyOwner {
         // Checks that the lottery is past the closing block
         require(
             allLotteries_[_lotteryId].closingTimestamp <= block.timestamp,
             "Cannot set winning numbers during lottery"
         );
         // Checks lottery numbers have not already been drawn
-        require(
-            allLotteries_[_lotteryId].lotteryStatus == Status.Open,
-            "Lottery State incorrect for draw"
-        );
+        require(allLotteries_[_lotteryId].lotteryStatus == Status.Open, "Lottery State incorrect for draw");
         // Sets lottery status to closed
         allLotteries_[_lotteryId].lotteryStatus = Status.Closed;
         // Requests a random number from the generator
@@ -364,17 +310,11 @@ contract Lottery is Ownable {
 
     function numbersDrawn(
         uint256 _lotteryId,
-        bytes32 _requestId, 
+        bytes32 _requestId,
         uint256 _randomNumber
-    ) 
-        external
-        onlyRandomGenerator()
-    {
-        require(
-            allLotteries_[_lotteryId].lotteryStatus == Status.Closed,
-            "Draw numbers first"
-        );
-        if(requestId_ == _requestId) {
+    ) external onlyRandomGenerator {
+        require(allLotteries_[_lotteryId].lotteryStatus == Status.Closed, "Draw numbers first");
+        if (requestId_ == _requestId) {
             allLotteries_[_lotteryId].lotteryStatus = Status.Completed;
             allLotteries_[_lotteryId].winningNumbers = _split(_randomNumber);
         }
@@ -382,60 +322,53 @@ contract Lottery is Ownable {
         // emit LotteryClose(_lotteryId, nft_.getTotalSupply());
     }
 
+    // * @param   _prizeDistribution An array defining the distribution of the
+    //  *          prize pool. I.e if a lotto has 5 numbers, the distribution could
+    //  *          be [5, 10, 15, 20, 30] = 100%. This means if you get one number
+    //  *          right you get 5% of the pool, 2 matching would be 10% and so on.
+    //  * @param   _prizePoolInCake The amount of Cake available to win in this
+    //  *          lottery.
+
     /**
-     * @param   _prizeDistribution An array defining the distribution of the 
-     *          prize pool. I.e if a lotto has 5 numbers, the distribution could
-     *          be [5, 10, 15, 20, 30] = 100%. This means if you get one number
-     *          right you get 5% of the pool, 2 matching would be 10% and so on.
-     * @param   _prizePoolInCake The amount of Cake available to win in this 
+     * @param   _startingTimestamp The block timestamp for the beginning of the
      *          lottery.
-     * @param   _startingTimestamp The block timestamp for the beginning of the 
-     *          lottery. 
      * @param   _closingTimestamp The block timestamp after which no more tickets
      *          will be sold for the lottery. Note that this timestamp MUST
-     *          be after the starting block timestamp. 
+     *          be after the starting block timestamp.
      */
     function createNewLotto(
-        uint8[] calldata _prizeDistribution,
-        uint256 _prizePoolInCake,
-        uint256 _costPerTicket,
+        // uint8[] calldata _prizeDistribution,
+        // uint256 _prizePoolInCake,
+        // uint256 _costPerTicket,
         uint256 _startingTimestamp,
         uint256 _closingTimestamp
-    )
-        external
-        onlyOwner()
-        returns(uint256 lotteryId)
-    {
-        require(
-            _prizeDistribution.length == sizeOfLottery_,
-            "Invalid distribution"
-        );
-        uint256 prizeDistributionTotal = 0;
-        for (uint256 j = 0; j < _prizeDistribution.length; j++) {
-            prizeDistributionTotal = prizeDistributionTotal.add(
-                uint256(_prizeDistribution[j])
-            );
-        }
+    ) external onlyOwner returns (uint256 lotteryId) {
+        // require(
+        //     _prizeDistribution.length == sizeOfLottery_,
+        //     "Invalid distribution"
+        // );
+        // uint256 prizeDistributionTotal = 0;
+        // for (uint256 j = 0; j < _prizeDistribution.length; j++) {
+        //     prizeDistributionTotal = prizeDistributionTotal.add(
+        //         uint256(_prizeDistribution[j])
+        //     );
+        // }
         // Ensuring that prize distribution total is 100%
-        require(
-            prizeDistributionTotal == 100,
-            "Prize distribution is not 100%"
-        );
-        require(
-            _prizePoolInCake != 0 && _costPerTicket != 0,
-            "Prize or cost cannot be 0"
-        );
-        require(
-            _startingTimestamp != 0 &&
-            _startingTimestamp < _closingTimestamp,
-            "Timestamps for lottery invalid"
-        );
-        // Incrementing lottery ID 
+        // require(
+        //     prizeDistributionTotal == 100,
+        //     "Prize distribution is not 100%"
+        // );
+        // require(
+        //     _prizePoolInCake != 0 && _costPerTicket != 0,
+        //     "Prize or cost cannot be 0"
+        // );
+        require(_startingTimestamp != 0 && _startingTimestamp < _closingTimestamp, "Timestamps for lottery invalid");
+        // Incrementing lottery ID
         lotteryIdCounter_ = lotteryIdCounter_.add(1);
         lotteryId = lotteryIdCounter_;
         uint16[] memory winningNumbers = new uint16[](sizeOfLottery_);
         Status lotteryStatus;
-        if(_startingTimestamp >= block.timestamp) {
+        if (_startingTimestamp >= block.timestamp) {
             lotteryStatus = Status.Open;
         } else {
             lotteryStatus = Status.NotStarted;
@@ -444,9 +377,9 @@ contract Lottery is Ownable {
         LottoInfo memory newLottery = LottoInfo(
             lotteryId,
             lotteryStatus,
-            _prizePoolInCake,
-            _costPerTicket,
-            _prizeDistribution,
+            // _prizePoolInCake,
+            // _costPerTicket,
+            // _prizeDistribution,
             _startingTimestamp,
             _closingTimestamp,
             winningNumbers
@@ -455,14 +388,14 @@ contract Lottery is Ownable {
         // TODO fix
         // Emitting important information around new lottery.
         // emit LotteryOpen(
-        //     lotteryId, 
+        //     lotteryId,
         //     nft_.getTotalSupply()
         // );
     }
 
     // function withdrawCake(uint256 _amount) external onlyOwner() {
     //     cake_.transfer(
-    //         msg.sender, 
+    //         msg.sender,
     //         _amount
     //     );
     // }
@@ -509,14 +442,14 @@ contract Lottery is Ownable {
     //     );
     //     // Getting the cost and discount for the token purchase
     //     (
-    //         uint256 totalCost, 
-    //         uint256 discount, 
+    //         uint256 totalCost,
+    //         uint256 discount,
     //         uint256 costWithDiscount
     //     ) = this.costToBuyTicketsWithDiscount(_lotteryId, _numberOfTickets);
     //     // Transfers the required cake to this contract
     //     cake_.transferFrom(
-    //         msg.sender, 
-    //         address(this), 
+    //         msg.sender,
+    //         address(this),
     //         costWithDiscount
     //     );
     //     // Batch mints the user their tickets
@@ -538,14 +471,14 @@ contract Lottery is Ownable {
     //     );
     // }
 
-// claim reward don't remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // claim reward don't remove!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // function claimReward(uint256 _lotteryId, uint256 _tokenId) external notContract() {
     //     // Checking the lottery is in a valid time for claiming
     //     require(
     //         allLotteries_[_lotteryId].closingTimestamp <= block.timestamp,
     //         "Wait till end to claim"
     //     );
-    //     // Checks the lottery winning numbers are available 
+    //     // Checks the lottery winning numbers are available
     //     require(
     //         allLotteries_[_lotteryId].lotteryStatus == Status.Completed,
     //         "Winning Numbers not chosen yet"
@@ -576,10 +509,10 @@ contract Lottery is Ownable {
     // }
 
     // function batchClaimRewards(
-    //     uint256 _lotteryId, 
+    //     uint256 _lotteryId,
     //     uint256[] calldata _tokeIds
-    // ) 
-    //     external 
+    // )
+    //     external
     //     notContract()
     // {
     //     require(
@@ -591,7 +524,7 @@ contract Lottery is Ownable {
     //         allLotteries_[_lotteryId].closingTimestamp <= block.timestamp,
     //         "Wait till end to claim"
     //     );
-    //     // Checks the lottery winning numbers are available 
+    //     // Checks the lottery winning numbers are available
     //     require(
     //         allLotteries_[_lotteryId].lotteryStatus == Status.Completed,
     //         "Winning Numbers not chosen yet"
@@ -635,14 +568,14 @@ contract Lottery is Ownable {
     // }
 
     //-------------------------------------------------------------------------
-    // INTERNAL FUNCTIONS 
+    // INTERNAL FUNCTIONS
     //-------------------------------------------------------------------------
 
     // function _discount(
-    //     uint256 lotteryId, 
+    //     uint256 lotteryId,
     //     uint256 _numberOfTickets
     // )
-    //     internal 
+    //     internal
     //     view
     //     returns(uint256 discountAmount)
     // {
@@ -662,18 +595,15 @@ contract Lottery is Ownable {
     //     }
     // }
 
-    function _getNumberOfMatching(
-        uint16[] memory _usersNumbers, 
-        uint16[] memory _winningNumbers
-    )
+    function _getNumberOfMatching(uint16[] memory _usersNumbers, uint16[] memory _winningNumbers)
         internal
         pure
-        returns(uint8 noOfMatching)
+        returns (uint8 noOfMatching)
     {
         // Loops through all wimming numbers
         for (uint256 i = 0; i < _winningNumbers.length; i++) {
             // If the winning numbers and user numbers match
-            if(_usersNumbers[i] == _winningNumbers[i]) {
+            if (_usersNumbers[i] == _winningNumbers[i]) {
                 // The number of matching numbers incrases
                 noOfMatching += 1;
             }
@@ -683,21 +613,21 @@ contract Lottery is Ownable {
     // /**
     //  * @param   _noOfMatching: The number of matching numbers the user has
     //  * @param   _lotteryId: The ID of the lottery the user is claiming on
-    //  * @return  uint256: The prize amount in cake the user is entitled to 
+    //  * @return  uint256: The prize amount in cake the user is entitled to
     //  */
     // function _prizeForMatching(
     //     uint8 _noOfMatching,
     //     uint256 _lotteryId
-    // ) 
-    //     internal  
+    // )
+    //     internal
     //     view
-    //     returns(uint256) 
+    //     returns(uint256)
     // {
     //     uint256 prize = 0;
     //     // If user has no matching numbers their prize is 0
     //     if(_noOfMatching == 0) {
     //         return 0;
-    //     } 
+    //     }
     //     // Getting the percentage of the pool the user has won
     //     uint256 perOfPool = allLotteries_[_lotteryId].prizeDistribution[_noOfMatching-1];
     //     // Timesing the percentage one by the pool
@@ -706,17 +636,11 @@ contract Lottery is Ownable {
     //     return prize.div(100);
     // }
 
-    function _split(
-        uint256 _randomNumber
-    ) 
-        internal
-        view 
-        returns(uint16[] memory) 
-    {
+    function _split(uint256 _randomNumber) internal view returns (uint16[] memory) {
         // Temparary storage for winning numbers
         uint16[] memory winningNumbers = new uint16[](sizeOfLottery_);
         // Loops the size of the number of tickets in the lottery
-        for(uint i = 0; i < sizeOfLottery_; i++){
+        for (uint256 i = 0; i < sizeOfLottery_; i++) {
             // Encodes the random number with its position in loop
             bytes32 hashOfRandom = keccak256(abi.encodePacked(_randomNumber, i));
             // Casts random number hash into uint256
@@ -724,6 +648,6 @@ contract Lottery is Ownable {
             // Sets the winning number position to a uint16 of random hash number
             winningNumbers[i] = uint16(numberRepresentation.mod(maxValidRange_));
         }
-    return winningNumbers;
+        return winningNumbers;
     }
 }
