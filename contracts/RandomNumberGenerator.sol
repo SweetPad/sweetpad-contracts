@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity ^0.8.7;
 
-import "@chainlink/contracts/src/v0.6/VRFConsumerBase.sol";
-import "./ILottery.sol";
+import "@chainlink/contracts/src/v0.8/VRFConsumerBase.sol";
+import "./interfaces/ISweetpadLottery.sol";
 
 contract RandomNumberGenerator is VRFConsumerBase {
     
@@ -43,8 +43,7 @@ contract RandomNumberGenerator is VRFConsumerBase {
      * Requests randomness from a user-provided seed
      */
     function getRandomNumber(
-        uint256 lotteryId,
-        uint256 userProvidedSeed
+        uint256 lotteryId
     ) 
         public 
         onlyLottery()
@@ -57,14 +56,14 @@ contract RandomNumberGenerator is VRFConsumerBase {
         );
         requester = msg.sender;
         currentLotteryId = lotteryId;
-        return requestRandomness(keyHash, fee, userProvidedSeed);
+        return requestRandomness(keyHash, fee);
     }
 
     /**
      * Callback function used by VRF Coordinator
      */
     function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {
-        ILottery(requester).numbersDrawn(
+        ISweetpadLottery(requester).numbersDrawn(
             currentLotteryId,
             requestId,
             randomness

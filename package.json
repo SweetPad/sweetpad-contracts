@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@atixlabs/hardhat-time-n-mine": "^0.0.5",
-		"@chainlink/contracts": "^0.4.1",
+		"@chainlink/contracts": "^0.4.2",
 		"@nomiclabs/hardhat-ethers": "^2.0.6",
 		"@nomiclabs/hardhat-etherscan": "^3.0.3",
 		"@nomiclabs/hardhat-solhint": "^2.0.1",
