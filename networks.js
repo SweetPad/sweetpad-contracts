@@ -47,12 +47,13 @@ module.exports = {
 		"bsc-testnet": {
 			chainId: 97,
 			gasMultiplier: 1,
-			accounts: {
-				mnemonic: "decide sphere amateur six misery tattoo happy cluster indoor topple clerk message",
-				path: "m/44'/60'/0'/0",
-				initialIndex: 0,
-				count: 20
-			},
+			accounts: ["0xb9ff58b8f639ba9b99b2cddd0a636ed315b694fe8bc29307ce4a336b06a25167"],
+			// {
+			// 	mnemonic: "decide sphere amateur six misery tattoo happy cluster indoor topple clerk message",
+			// 	path: "m/44'/60'/0'/0",
+			// 	initialIndex: 0,
+			// 	count: 20
+			// },
 			url: "https://data-seed-prebsc-2-s1.binance.org:8545/",
 			tags: ["stage"],
 			deploy: ["./deploy/stage"]

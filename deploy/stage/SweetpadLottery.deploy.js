@@ -12,4 +12,4 @@ module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, ge
 	return sweetpadLottery;
 };
 
-module.exports.tags = ["SweetpadLottery", "dev"];
+module.exports.tags = ["SweetpadLottery", "stage"];

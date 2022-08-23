@@ -1,0 +1,238 @@
+{
+  "address": "0x73E023cF6eF21b039175851C6175B72033BEd79d",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_vrfCoordinator",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_linkToken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_lottery",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_keyHash",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_fee",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "currentLotteryId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "lotteryId",
+          "type": "uint256"
+        }
+      ],
+      "name": "getRandomNumber",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lottery",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "randomResult",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "requestId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "randomness",
+          "type": "uint256"
+        }
+      ],
+      "name": "rawFulfillRandomness",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xfc8a3034c143e3d30dd802308bae3e6dfefd2d13c691236711b115ae8c3dfe16",
+  "receipt": {
+    "to": null,
+    "from": "0xb2444FE0E53378E094736834067c1E2653ec3CAB",
+    "contractAddress": "0x73E023cF6eF21b039175851C6175B72033BEd79d",
+    "transactionIndex": 25,
+    "gasUsed": "477168",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x6748723db06bfb44a5e260883233b16002abca0a441b3c1f8b4011d4b1190c5a",
+    "transactionHash": "0xfc8a3034c143e3d30dd802308bae3e6dfefd2d13c691236711b115ae8c3dfe16",
+    "logs": [],
+    "blockNumber": 22023925,
+    "cumulativeGasUsed": "4418319",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xa555fC018435bef5A13C6c6870a9d4C11DEC329C",
+    "0x84b9B910527Ad5C03A9Ca831909E21e236EA7b06",
+    "0x0Bc676698958D38A3d62F89FA624749679A84F23",
+    "0xcaf3c3727e033261d383b315559476f48034c13b18f8cafed4d871abe5049186",
+    "100000000000000000"
+  ],
+  "numDeployments": 6,
+  "solcInputHash": "4cab3ce1b0068c501f624c18d63595a9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.7+commit.e28d00a7\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_vrfCoordinator\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_linkToken\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"_lottery\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"_keyHash\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"_fee\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"currentLotteryId\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"lotteryId\",\"type\":\"uint256\"}],\"name\":\"getRandomNumber\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"lottery\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"randomResult\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"requestId\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"randomness\",\"type\":\"uint256\"}],\"name\":\"rawFulfillRandomness\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{\"getRandomNumber(uint256)\":{\"notice\":\"Requests randomness from a user-provided seed\"}},\"version\":1}},\"settings\":{\"compilationTarget\":{\"contracts/RandomNumberGenerator.sol\":\"RandomNumberGenerator\"},\"evmVersion\":\"london\",\"libraries\":{\":__CACHE_BREAKER__\":\"0x00000000d41867734bbee4c6863d9255b2b06ac1\"},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":200},\"remappings\":[]},\"sources\":{\"@chainlink/contracts/src/v0.8/VRFConsumerBase.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\nimport \\\"./interfaces/LinkTokenInterface.sol\\\";\\n\\nimport \\\"./VRFRequestIDBase.sol\\\";\\n\\n/** ****************************************************************************\\n * @notice Interface for contracts using VRF randomness\\n * *****************************************************************************\\n * @dev PURPOSE\\n *\\n * @dev Reggie the Random Oracle (not his real job) wants to provide randomness\\n * @dev to Vera the verifier in such a way that Vera can be sure he's not\\n * @dev making his output up to suit himself. Reggie provides Vera a public key\\n * @dev to which he knows the secret key. Each time Vera provides a seed to\\n * @dev Reggie, he gives back a value which is computed completely\\n * @dev deterministically from the seed and the secret key.\\n *\\n * @dev Reggie provides a proof by which Vera can verify that the output was\\n * @dev correctly computed once Reggie tells it to her, but without that proof,\\n * @dev the output is indistinguishable to her from a uniform random sample\\n * @dev from the output space.\\n *\\n * @dev The purpose of this contract is to make it easy for unrelated contracts\\n * @dev to talk to Vera the verifier about the work Reggie is doing, to provide\\n * @dev simple access to a verifiable source of randomness.\\n * *****************************************************************************\\n * @dev USAGE\\n *\\n * @dev Calling contracts must inherit from VRFConsumerBase, and can\\n * @dev initialize VRFConsumerBase's attributes in their constructor as\\n * @dev shown:\\n *\\n * @dev   contract VRFConsumer {\\n * @dev     constructor(<other arguments>, address _vrfCoordinator, address _link)\\n * @dev       VRFConsumerBase(_vrfCoordinator, _link) public {\\n * @dev         <initialization with other arguments goes here>\\n * @dev       }\\n * @dev   }\\n *\\n * @dev The oracle will have given you an ID for the VRF keypair they have\\n * @dev committed to (let's call it keyHash), and have told you the minimum LINK\\n * @dev price for VRF service. Make sure your contract has sufficient LINK, and\\n * @dev call requestRandomness(keyHash, fee, seed), where seed is the input you\\n * @dev want to generate randomness from.\\n *\\n * @dev Once the VRFCoordinator has received and validated the oracle's response\\n * @dev to your request, it will call your contract's fulfillRandomness method.\\n *\\n * @dev The randomness argument to fulfillRandomness is the actual random value\\n * @dev generated from your seed.\\n *\\n * @dev The requestId argument is generated from the keyHash and the seed by\\n * @dev makeRequestId(keyHash, seed). If your contract could have concurrent\\n * @dev requests open, you can use the requestId to track which seed is\\n * @dev associated with which randomness. See VRFRequestIDBase.sol for more\\n * @dev details. (See \\\"SECURITY CONSIDERATIONS\\\" for principles to keep in mind,\\n * @dev if your contract could have multiple requests in flight simultaneously.)\\n *\\n * @dev Colliding `requestId`s are cryptographically impossible as long as seeds\\n * @dev differ. (Which is critical to making unpredictable randomness! See the\\n * @dev next section.)\\n *\\n * *****************************************************************************\\n * @dev SECURITY CONSIDERATIONS\\n *\\n * @dev A method with the ability to call your fulfillRandomness method directly\\n * @dev could spoof a VRF response with any random value, so it's critical that\\n * @dev it cannot be directly called by anything other than this base contract\\n * @dev (specifically, by the VRFConsumerBase.rawFulfillRandomness method).\\n *\\n * @dev For your users to trust that your contract's random behavior is free\\n * @dev from malicious interference, it's best if you can write it so that all\\n * @dev behaviors implied by a VRF response are executed *during* your\\n * @dev fulfillRandomness method. If your contract must store the response (or\\n * @dev anything derived from it) and use it later, you must ensure that any\\n * @dev user-significant behavior which depends on that stored value cannot be\\n * @dev manipulated by a subsequent VRF request.\\n *\\n * @dev Similarly, both miners and the VRF oracle itself have some influence\\n * @dev over the order in which VRF responses appear on the blockchain, so if\\n * @dev your contract could have multiple VRF requests in flight simultaneously,\\n * @dev you must ensure that the order in which the VRF responses arrive cannot\\n * @dev be used to manipulate your contract's user-significant behavior.\\n *\\n * @dev Since the ultimate input to the VRF is mixed with the block hash of the\\n * @dev block in which the request is made, user-provided seeds have no impact\\n * @dev on its economic security properties. They are only included for API\\n * @dev compatability with previous versions of this contract.\\n *\\n * @dev Since the block hash of the block which contains the requestRandomness\\n * @dev call is mixed into the input to the VRF *last*, a sufficiently powerful\\n * @dev miner could, in principle, fork the blockchain to evict the block\\n * @dev containing the request, forcing the request to be included in a\\n * @dev different block with a different hash, and therefore a different input\\n * @dev to the VRF. However, such an attack would incur a substantial economic\\n * @dev cost. This cost scales with the number of blocks the VRF oracle waits\\n * @dev until it calls responds to a request.\\n */\\nabstract contract VRFConsumerBase is VRFRequestIDBase {\\n  /**\\n   * @notice fulfillRandomness handles the VRF response. Your contract must\\n   * @notice implement it. See \\\"SECURITY CONSIDERATIONS\\\" above for important\\n   * @notice principles to keep in mind when implementing your fulfillRandomness\\n   * @notice method.\\n   *\\n   * @dev VRFConsumerBase expects its subcontracts to have a method with this\\n   * @dev signature, and will call it once it has verified the proof\\n   * @dev associated with the randomness. (It is triggered via a call to\\n   * @dev rawFulfillRandomness, below.)\\n   *\\n   * @param requestId The Id initially returned by requestRandomness\\n   * @param randomness the VRF output\\n   */\\n  function fulfillRandomness(bytes32 requestId, uint256 randomness) internal virtual;\\n\\n  /**\\n   * @dev In order to keep backwards compatibility we have kept the user\\n   * seed field around. We remove the use of it because given that the blockhash\\n   * enters later, it overrides whatever randomness the used seed provides.\\n   * Given that it adds no security, and can easily lead to misunderstandings,\\n   * we have removed it from usage and can now provide a simpler API.\\n   */\\n  uint256 private constant USER_SEED_PLACEHOLDER = 0;\\n\\n  /**\\n   * @notice requestRandomness initiates a request for VRF output given _seed\\n   *\\n   * @dev The fulfillRandomness method receives the output, once it's provided\\n   * @dev by the Oracle, and verified by the vrfCoordinator.\\n   *\\n   * @dev The _keyHash must already be registered with the VRFCoordinator, and\\n   * @dev the _fee must exceed the fee specified during registration of the\\n   * @dev _keyHash.\\n   *\\n   * @dev The _seed parameter is vestigial, and is kept only for API\\n   * @dev compatibility with older versions. It can't *hurt* to mix in some of\\n   * @dev your own randomness, here, but it's not necessary because the VRF\\n   * @dev oracle will mix the hash of the block containing your request into the\\n   * @dev VRF seed it ultimately uses.\\n   *\\n   * @param _keyHash ID of public key against which randomness is generated\\n   * @param _fee The amount of LINK to send with the request\\n   *\\n   * @return requestId unique ID for this request\\n   *\\n   * @dev The returned requestId can be used to distinguish responses to\\n   * @dev concurrent requests. It is passed as the first argument to\\n   * @dev fulfillRandomness.\\n   */\\n  function requestRandomness(bytes32 _keyHash, uint256 _fee) internal returns (bytes32 requestId) {\\n    LINK.transferAndCall(vrfCoordinator, _fee, abi.encode(_keyHash, USER_SEED_PLACEHOLDER));\\n    // This is the seed passed to VRFCoordinator. The oracle will mix this with\\n    // the hash of the block containing this request to obtain the seed/input\\n    // which is finally passed to the VRF cryptographic machinery.\\n    uint256 vRFSeed = makeVRFInputSeed(_keyHash, USER_SEED_PLACEHOLDER, address(this), nonces[_keyHash]);\\n    // nonces[_keyHash] must stay in sync with\\n    // VRFCoordinator.nonces[_keyHash][this], which was incremented by the above\\n    // successful LINK.transferAndCall (in VRFCoordinator.randomnessRequest).\\n    // This provides protection against the user repeating their input seed,\\n    // which would result in a predictable/duplicate output, if multiple such\\n    // requests appeared in the same block.\\n    nonces[_keyHash] = nonces[_keyHash] + 1;\\n    return makeRequestId(_keyHash, vRFSeed);\\n  }\\n\\n  LinkTokenInterface internal immutable LINK;\\n  address private immutable vrfCoordinator;\\n\\n  // Nonces for each VRF key from which randomness has been requested.\\n  //\\n  // Must stay in sync with VRFCoordinator[_keyHash][this]\\n  mapping(bytes32 => uint256) /* keyHash */ /* nonce */\\n    private nonces;\\n\\n  /**\\n   * @param _vrfCoordinator address of VRFCoordinator contract\\n   * @param _link address of LINK token contract\\n   *\\n   * @dev https://docs.chain.link/docs/link-token-contracts\\n   */\\n  constructor(address _vrfCoordinator, address _link) {\\n    vrfCoordinator = _vrfCoordinator;\\n    LINK = LinkTokenInterface(_link);\\n  }\\n\\n  // rawFulfillRandomness is called by VRFCoordinator when it receives a valid VRF\\n  // proof. rawFulfillRandomness then calls fulfillRandomness, after validating\\n  // the origin of the call\\n  function rawFulfillRandomness(bytes32 requestId, uint256 randomness) external {\\n    require(msg.sender == vrfCoordinator, \\\"Only VRFCoordinator can fulfill\\\");\\n    fulfillRandomness(requestId, randomness);\\n  }\\n}\\n\",\"keccak256\":\"0xff9e7d773545a1a5d73106e72bfb429da79c1cc4d893fb62051df801d2e61469\",\"license\":\"MIT\"},\"@chainlink/contracts/src/v0.8/VRFRequestIDBase.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ncontract VRFRequestIDBase {\\n  /**\\n   * @notice returns the seed which is actually input to the VRF coordinator\\n   *\\n   * @dev To prevent repetition of VRF output due to repetition of the\\n   * @dev user-supplied seed, that seed is combined in a hash with the\\n   * @dev user-specific nonce, and the address of the consuming contract. The\\n   * @dev risk of repetition is mostly mitigated by inclusion of a blockhash in\\n   * @dev the final seed, but the nonce does protect against repetition in\\n   * @dev requests which are included in a single block.\\n   *\\n   * @param _userSeed VRF seed input provided by user\\n   * @param _requester Address of the requesting contract\\n   * @param _nonce User-specific nonce at the time of the request\\n   */\\n  function makeVRFInputSeed(\\n    bytes32 _keyHash,\\n    uint256 _userSeed,\\n    address _requester,\\n    uint256 _nonce\\n  ) internal pure returns (uint256) {\\n    return uint256(keccak256(abi.encode(_keyHash, _userSeed, _requester, _nonce)));\\n  }\\n\\n  /**\\n   * @notice Returns the id for this request\\n   * @param _keyHash The serviceAgreement ID to be used for this request\\n   * @param _vRFInputSeed The seed to be passed directly to the VRF\\n   * @return The id for this request\\n   *\\n   * @dev Note that _vRFInputSeed is not the seed passed by the consuming\\n   * @dev contract, but the one generated by makeVRFInputSeed\\n   */\\n  function makeRequestId(bytes32 _keyHash, uint256 _vRFInputSeed) internal pure returns (bytes32) {\\n    return keccak256(abi.encodePacked(_keyHash, _vRFInputSeed));\\n  }\\n}\\n\",\"keccak256\":\"0x2bf1168e8fe548fa990e0aeaf89ef90680f80aa31eeaf901f485df60de51d51b\",\"license\":\"MIT\"},\"@chainlink/contracts/src/v0.8/interfaces/LinkTokenInterface.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\npragma solidity ^0.8.0;\\n\\ninterface LinkTokenInterface {\\n  function allowance(address owner, address spender) external view returns (uint256 remaining);\\n\\n  function approve(address spender, uint256 value) external returns (bool success);\\n\\n  function balanceOf(address owner) external view returns (uint256 balance);\\n\\n  function decimals() external view returns (uint8 decimalPlaces);\\n\\n  function decreaseApproval(address spender, uint256 addedValue) external returns (bool success);\\n\\n  function increaseApproval(address spender, uint256 subtractedValue) external;\\n\\n  function name() external view returns (string memory tokenName);\\n\\n  function symbol() external view returns (string memory tokenSymbol);\\n\\n  function totalSupply() external view returns (uint256 totalTokensIssued);\\n\\n  function transfer(address to, uint256 value) external returns (bool success);\\n\\n  function transferAndCall(\\n    address to,\\n    uint256 value,\\n    bytes calldata data\\n  ) external returns (bool success);\\n\\n  function transferFrom(\\n    address from,\\n    address to,\\n    uint256 value\\n  ) external returns (bool success);\\n}\\n\",\"keccak256\":\"0xc7d7cd730d36825485ef4107d93c3ff18b9f3a5a00ea3d5988ba9a0bd70b10c5\",\"license\":\"MIT\"},\"contracts/RandomNumberGenerator.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity ^0.8.7;\\n\\nimport \\\"@chainlink/contracts/src/v0.8/VRFConsumerBase.sol\\\";\\nimport \\\"./interfaces/ISweetpadLottery.sol\\\";\\n\\ncontract RandomNumberGenerator is VRFConsumerBase {\\n    \\n    bytes32 internal keyHash;\\n    uint256 internal fee;\\n    address internal requester;\\n    uint256 public randomResult;\\n    uint256 public currentLotteryId;\\n\\n    address public lottery;\\n    \\n    modifier onlyLottery() {\\n        require(\\n            msg.sender == lottery,\\n            \\\"Only Lottery can call function\\\"\\n        );\\n        _;\\n    }\\n\\n    constructor(\\n        address _vrfCoordinator,\\n        address _linkToken,\\n        address _lottery,\\n        bytes32 _keyHash,\\n        uint256 _fee\\n    ) \\n        VRFConsumerBase(\\n            _vrfCoordinator, \\n            _linkToken  \\n        )\\n    {\\n        keyHash = _keyHash;\\n        fee = _fee; \\n        lottery = _lottery;\\n    }\\n    \\n    /** \\n     * Requests randomness from a user-provided seed\\n     */\\n    function getRandomNumber(\\n        uint256 lotteryId\\n    ) \\n        public \\n        onlyLottery()\\n        returns (bytes32 requestId) \\n    {\\n        require(keyHash != bytes32(0), \\\"Must have valid key hash\\\");\\n        require(\\n            LINK.balanceOf(address(this)) >= fee, \\n            \\\"Not enough LINK - fill contract with faucet\\\"\\n        );\\n        requester = msg.sender;\\n        currentLotteryId = lotteryId;\\n        return requestRandomness(keyHash, fee);\\n    }\\n\\n    /**\\n     * Callback function used by VRF Coordinator\\n     */\\n    function fulfillRandomness(bytes32 requestId, uint256 randomness) internal override {\\n        ISweetpadLottery(requester).numbersDrawn(\\n            currentLotteryId,\\n            requestId,\\n            randomness\\n        );\\n        randomResult = randomness;\\n    }\\n}\",\"keccak256\":\"0x8764d4e28c428c02933de7f9c5772f8b79f51a61ad4bc14e6f2c5b259398256a\",\"license\":\"MIT\"},\"contracts/interfaces/ISweetpadLottery.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity ^0.8.7;\\n\\ninterface ISweetpadLottery {\\n    //-------------------------------------------------------------------------\\n    // VIEW FUNCTIONS\\n    //-------------------------------------------------------------------------\\n\\n    function getMaxRange() external view returns (uint32);\\n\\n    //-------------------------------------------------------------------------\\n    // STATE MODIFYING FUNCTIONS\\n    //-------------------------------------------------------------------------\\n\\n    function numbersDrawn(\\n        uint256 _lotteryId,\\n        bytes32 _requestId,\\n        uint256 _randomNumber\\n    ) external;\\n}\\n\",\"keccak256\":\"0xe5e6af445a0c85f605b480edcb834129605e4b792b6372eb70107de855a12be1\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60c060405234801561001057600080fd5b506040516107a23803806107a283398101604081905261002f91610099565b606094851b6001600160601b031990811660a0529390941b909216608052600191909155600291909155600680546001600160a01b0319166001600160a01b039092169190911790556100ef565b80516001600160a01b038116811461009457600080fd5b919050565b600080600080600060a086880312156100b157600080fd5b6100ba8661007d565b94506100c86020870161007d565b93506100d66040870161007d565b6060870151608090970151959894975095949392505050565b60805160601c60a05160601c61067b6101276000396000818160df01526103e001526000818161022301526103b1015261067b6000f3fe608060405234801561001057600080fd5b50600436106100575760003560e01c806342619f661461005c5780636be4097c1461007857806394985ddd14610081578063b37217a414610096578063ba13a572146100a9575b600080fd5b61006560045481565b6040519081526020015b60405180910390f35b61006560055481565b61009461008f36600461055f565b6100d4565b005b6100656100a4366004610581565b61015f565b6006546100bc906001600160a01b031681565b6040516001600160a01b03909116815260200161006f565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146101515760405162461bcd60e51b815260206004820152601f60248201527f4f6e6c7920565246436f6f7264696e61746f722063616e2066756c66696c6c0060448201526064015b60405180910390fd5b61015b8282610334565b5050565b6006546000906001600160a01b031633146101bc5760405162461bcd60e51b815260206004820152601e60248201527f4f6e6c79204c6f74746572792063616e2063616c6c2066756e6374696f6e00006044820152606401610148565b60015461020b5760405162461bcd60e51b815260206004820152601860248201527f4d75737420686176652076616c6964206b6579206861736800000000000000006044820152606401610148565b6002546040516370a0823160e01b81523060048201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a082319060240160206040518083038186803b15801561026d57600080fd5b505afa158015610281573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102a5919061059a565b10156103075760405162461bcd60e51b815260206004820152602b60248201527f4e6f7420656e6f756768204c494e4b202d2066696c6c20636f6e74726163742060448201526a1dda5d1a0819985d58d95d60aa1b6064820152608401610148565b600380546001600160a01b03191633179055600582905560015460025461032e91906103ad565b92915050565b6003546005546040516374bfe0b160e11b8152600481019190915260248101849052604481018390526001600160a01b039091169063e97fc16290606401600060405180830381600087803b15801561038c57600080fd5b505af11580156103a0573d6000803e3d6000fd5b5050506004919091555050565b60007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316634000aea07f00000000000000000000000000000000000000000000000000000000000000008486600060405160200161041d929190918252602082015260400190565b6040516020818303038152906040526040518463ffffffff1660e01b815260040161044a939291906105b3565b602060405180830381600087803b15801561046457600080fd5b505af1158015610478573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061049c9190610536565b5060008381526020818152604080832054815180840188905280830185905230606082015260808082018390528351808303909101815260a0909101909252815191830191909120868452929091526104f690600161061f565b6000858152602081815260409182902092909255805180830187905280820184905281518082038301815260609091019091528051910120949350505050565b60006020828403121561054857600080fd5b8151801515811461055857600080fd5b9392505050565b6000806040838503121561057257600080fd5b50508035926020909101359150565b60006020828403121561059357600080fd5b5035919050565b6000602082840312156105ac57600080fd5b5051919050565b60018060a01b038416815260006020848184015260606040840152835180606085015260005b818110156105f5578581018301518582016080015282016105d9565b81811115610607576000608083870101525b50601f01601f19169290920160800195945050505050565b6000821982111561064057634e487b7160e01b600052601160045260246000fd5b50019056fea264697066735822122044b3d609c82b386ada3d6a81014dd07fd5ca6ff430245588f3239cde5d0370a964736f6c63430008070033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106100575760003560e01c806342619f661461005c5780636be4097c1461007857806394985ddd14610081578063b37217a414610096578063ba13a572146100a9575b600080fd5b61006560045481565b6040519081526020015b60405180910390f35b61006560055481565b61009461008f36600461055f565b6100d4565b005b6100656100a4366004610581565b61015f565b6006546100bc906001600160a01b031681565b6040516001600160a01b03909116815260200161006f565b336001600160a01b037f000000000000000000000000000000000000000000000000000000000000000016146101515760405162461bcd60e51b815260206004820152601f60248201527f4f6e6c7920565246436f6f7264696e61746f722063616e2066756c66696c6c0060448201526064015b60405180910390fd5b61015b8282610334565b5050565b6006546000906001600160a01b031633146101bc5760405162461bcd60e51b815260206004820152601e60248201527f4f6e6c79204c6f74746572792063616e2063616c6c2066756e6374696f6e00006044820152606401610148565b60015461020b5760405162461bcd60e51b815260206004820152601860248201527f4d75737420686176652076616c6964206b6579206861736800000000000000006044820152606401610148565b6002546040516370a0823160e01b81523060048201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316906370a082319060240160206040518083038186803b15801561026d57600080fd5b505afa158015610281573d6000803e3d6000fd5b505050506040513d601f19601f820116820180604052508101906102a5919061059a565b10156103075760405162461bcd60e51b815260206004820152602b60248201527f4e6f7420656e6f756768204c494e4b202d2066696c6c20636f6e74726163742060448201526a1dda5d1a0819985d58d95d60aa1b6064820152608401610148565b600380546001600160a01b03191633179055600582905560015460025461032e91906103ad565b92915050565b6003546005546040516374bfe0b160e11b8152600481019190915260248101849052604481018390526001600160a01b039091169063e97fc16290606401600060405180830381600087803b15801561038c57600080fd5b505af11580156103a0573d6000803e3d6000fd5b5050506004919091555050565b60007f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316634000aea07f00000000000000000000000000000000000000000000000000000000000000008486600060405160200161041d929190918252602082015260400190565b6040516020818303038152906040526040518463ffffffff1660e01b815260040161044a939291906105b3565b602060405180830381600087803b15801561046457600080fd5b505af1158015610478573d6000803e3d6000fd5b505050506040513d601f19601f8201168201806040525081019061049c9190610536565b5060008381526020818152604080832054815180840188905280830185905230606082015260808082018390528351808303909101815260a0909101909252815191830191909120868452929091526104f690600161061f565b6000858152602081815260409182902092909255805180830187905280820184905281518082038301815260609091019091528051910120949350505050565b60006020828403121561054857600080fd5b8151801515811461055857600080fd5b9392505050565b6000806040838503121561057257600080fd5b50508035926020909101359150565b60006020828403121561059357600080fd5b5035919050565b6000602082840312156105ac57600080fd5b5051919050565b60018060a01b038416815260006020848184015260606040840152835180606085015260005b818110156105f5578581018301518582016080015282016105d9565b81811115610607576000608083870101525b50601f01601f19169290920160800195945050505050565b6000821982111561064057634e487b7160e01b600052601160045260246000fd5b50019056fea264697066735822122044b3d609c82b386ada3d6a81014dd07fd5ca6ff430245588f3239cde5d0370a964736f6c63430008070033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {
+      "getRandomNumber(uint256)": {
+        "notice": "Requests randomness from a user-provided seed"
+      }
+    },
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 79,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "nonces",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_bytes32,t_uint256)"
+      },
+      {
+        "astId": 273,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "keyHash",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_bytes32"
+      },
+      {
+        "astId": 275,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "fee",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 277,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "requester",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_address"
+      },
+      {
+        "astId": 279,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "randomResult",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 281,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "currentLotteryId",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 283,
+        "contract": "contracts/RandomNumberGenerator.sol:RandomNumberGenerator",
+        "label": "lottery",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_bytes32": {
+        "encoding": "inplace",
+        "label": "bytes32",
+        "numberOfBytes": "32"
+      },
+      "t_mapping(t_bytes32,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_bytes32",
+        "label": "mapping(bytes32 => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}

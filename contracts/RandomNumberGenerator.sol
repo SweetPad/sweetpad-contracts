@@ -32,7 +32,7 @@ contract RandomNumberGenerator is VRFConsumerBase {
         VRFConsumerBase(
             _vrfCoordinator, 
             _linkToken  
-        ) public
+        )
     {
         keyHash = _keyHash;
         fee = _fee; 
