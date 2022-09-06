@@ -46,7 +46,11 @@ interface ISweetpadNFTFreezing {
 
     // function tiketsForIdo(address, address) external returns(uint256[] memory);
 
-    function addTickets(address, address, uint256) external;
+    function addTickets(
+        address,
+        address,
+        uint256
+    ) external;
 
     event Froze(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
 
