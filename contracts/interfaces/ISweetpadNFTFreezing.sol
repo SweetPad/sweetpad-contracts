@@ -4,6 +4,7 @@ pragma solidity ^0.8.7;
 
 import "./ISweetpadNFT.sol";
 import "./ISweetpadTicket.sol";
+import "../SweetpadLottery.sol";
 
 interface ISweetpadNFTFreezing {
     struct NFTData {
@@ -31,6 +32,8 @@ interface ISweetpadNFTFreezing {
 
     function ticket() external view returns (ISweetpadTicket);
 
+    function lottery() external view returns (SweetpadLottery);
+
     function nftData(uint256) external view returns (address, uint256);
 
     function getNftsFrozeByUser(address) external view returns (uint256[] memory);
@@ -38,6 +41,12 @@ interface ISweetpadNFTFreezing {
     function setSweetpadNFT(address) external;
 
     function setSweetpadTicket(address) external;
+
+    function setSweetpadLottery(address) external;
+
+    // function tiketsForIdo(address, address) external returns(uint256[] memory);
+
+    function addTickets(address, address, uint256) external;
 
     event Froze(address indexed user, uint256 nftId, uint256 freezeEndBlock, uint256 ticketsMinted);
 

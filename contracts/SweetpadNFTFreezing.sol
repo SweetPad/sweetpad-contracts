@@ -9,6 +9,8 @@ import "./interfaces/ISweetpadNFTFreezing.sol";
 import "./interfaces/ISweetpadNFT.sol";
 import "./interfaces/ISweetpadTicket.sol";
 
+import "./SweetpadLottery.sol";
+
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
     uint256 private constant BLOCKS_PER_DAY = 10; // TODO for mainnet change to 28674
@@ -17,11 +19,14 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
     ISweetpadNFT public override nft;
     ISweetpadTicket public override ticket;
+    SweetpadLottery public override lottery;
 
     /// @notice NFT id -> frozen NFT data
     mapping(uint256 => NFTData) public override nftData;
     /// @notice user address -> NFT id's freezed by user
     mapping(address => uint256[]) public userNFTs;
+    mapping(uint256 => uint256) public ticketsPerNFT;
+    mapping(address => mapping(address => uint256[])) public tiketsForIdo;
 
     constructor(address _nft, address _ticket) {
         setSweetpadNFT(_nft);
@@ -34,14 +39,14 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
      * @param freezePeriod: freezing period in blocks
      */
     function freeze(uint256 nftId, uint256 freezePeriod) external override {
-        uint256 freezeEndBlock = _freeze(nftId, freezePeriod);
         uint256 ticketsToMint = freezePeriod == MAX_PERIOD
             ? nft.getTicketsQuantityById(nftId) * 2
             : nft.getTicketsQuantityById(nftId);
 
+        uint256 freezeEndBlock = _freeze(nftId, freezePeriod, ticketsToMint);
+
         emit Froze(msg.sender, nftId, freezeEndBlock, ticketsToMint);
 
-        ticket.mint(msg.sender, nftId, ticketsToMint);
         nft.safeTransferFrom(msg.sender, address(this), nftId);
     }
 
@@ -59,15 +64,13 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         ticketsToMintBatch = nft.getTicketsQuantityByIds(nftIds);
 
         for (uint256 i = 0; i < len; i++) {
-            freezeEndBlocks[i] = _freeze(nftIds[i], freezePeriods[i]);
-
             if (freezePeriods[i] == MAX_PERIOD) {
                 ticketsToMintBatch[i] = ticketsToMintBatch[i] * 2;
             }
+            freezeEndBlocks[i] = _freeze(nftIds[i], freezePeriods[i], ticketsToMintBatch[i]);
         }
         emit FrozeBatch(msg.sender, nftIds, freezeEndBlocks, ticketsToMintBatch);
 
-        ticket.mintBatch(msg.sender, nftIds, ticketsToMintBatch);
         nft.safeBatchTransferFrom(msg.sender, address(this), nftIds, "0x00");
     }
 
@@ -76,7 +79,6 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         emit Unfroze(msg.sender, nftId);
 
-        ticket.burn(msg.sender, nftId);
         nft.safeTransferFrom(address(this), msg.sender, nftId);
     }
 
@@ -87,8 +89,14 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
         emit UnfrozeBatch(msg.sender, nftIds);
 
-        ticket.burnBatch(msg.sender, nftIds);
         nft.safeBatchTransferFrom(address(this), msg.sender, nftIds, "");
+    }
+
+    function participate(address sweetpadIdo_) external {
+        require(userNFTs[msg.sender].length > 0, "SweetpadIDO: User doesn't have NFTs staked");
+        for(uint256 i; i < userNFTs[msg.sender].length; i++){
+            ticket.mint(msg.sender, ticketsPerNFT[userNFTs[msg.sender][i]], sweetpadIdo_);
+        }
     }
 
     /**
@@ -119,8 +127,21 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         require(newTicket != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
         ticket = ISweetpadTicket(newTicket);
     }
+    function setSweetpadLottery(address lottery_) public override onlyOwner {
+        require(lottery_ != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
+        lottery = SweetpadLottery(lottery_);
+    }
+    // TODO add only lottery
+    // TODO add requiers
+    function addTickets(address to_, address ido_, uint256 ticketId_) external override {
+        tiketsForIdo[to_][ido_].push(ticketId_);
+    }
 
-    function _freeze(uint256 nftId, uint256 freezePeriod) private returns (uint256 freezeEndBlock) {
+    function _freeze(
+        uint256 nftId,
+        uint256 freezePeriod,
+        uint256 ticketsToMint_
+    ) private returns (uint256 freezeEndBlock) {
         require(freezePeriod >= MIN_PERIOD && freezePeriod <= MAX_PERIOD, "SweetpadNFTFreezing: Wrong freeze period");
 
         freezeEndBlock = freezePeriod + block.number;
@@ -128,11 +149,14 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         nftData[nftId] = NFTData({freezer: msg.sender, freezeEndBlock: freezeEndBlock});
 
         userNFTs[msg.sender].push(nftId);
+
+        ticketsPerNFT[nftId] = ticketsToMint_;
     }
 
     function _unfreeze(uint256 nftId) private {
         NFTData memory _nftData = nftData[nftId];
         // slither-disable-next-line incorrect-equality
+        require(checkAbilityToUnfreeze(msg.sender), "SweetpadNFTFreezing: You are participating in IDO that doesn't closed yet");
         require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
         require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
         // slither-disable-next-line costly-loop
@@ -149,6 +173,16 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
                 break;
             }
+        }
+        delete ticketsPerNFT[nftId];
+    }
+
+    function checkAbilityToUnfreeze(address user_) internal view returns(bool){
+        for(uint256 i; i < (lottery.getOpenLotteries()).length; i++){
+            if(tiketsForIdo[user_][(lottery.getBasicLottoInfo((lottery.getOpenLotteries())[i])).ido].length > 0){
+                return false;
+            }
+            else return true;
         }
     }
 }
