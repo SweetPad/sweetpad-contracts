@@ -1,5 +1,5 @@
 module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSigners, getContract } }) {
-	const { deployer, owner } = await getNamedSigners();
+	const { deployer } = await getNamedSigners();
 	let sweetpadNFTFreezing;
 
 	const sweetpadNFT = await getContract("SweetpadNFT");
@@ -15,8 +15,8 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 
 		sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing");
 
-		await sweetpadNFTFreezing.transferOwnership(owner.address).then((tx) => tx.wait());
-		await sweetpadTicket.transferOwnership(sweetpadNFTFreezing.address).then((tx) => tx.wait());
+		// await sweetpadNFTFreezing.transferOwnership(owner.address).then((tx) => tx.wait());
+		// await sweetpadTicket.transferOwnership(sweetpadNFTFreezing.address).then((tx) => tx.wait());
 	} catch (error) {
 		throw error.message;
 	}
@@ -25,4 +25,4 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 };
 
 module.exports.tags = ["SweetpadNFTFreezing", "stage"];
-module.exports.dependencies = ["SweetpadNFT", "SweetpadTicket"];
+module.exports.dependencies = ["SweetpadTicket"];

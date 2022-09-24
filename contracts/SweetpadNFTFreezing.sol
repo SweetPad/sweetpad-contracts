@@ -10,6 +10,7 @@ import "./interfaces/ISweetpadNFT.sol";
 import "./interfaces/ISweetpadTicket.sol";
 
 import "./SweetpadLottery.sol";
+import "hardhat/console.sol";
 
 contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice Blocks per day for BSC
@@ -26,7 +27,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     /// @notice user address -> NFT id's freezed by user
     mapping(address => uint256[]) public userNFTs;
     mapping(uint256 => uint256) public ticketsPerNFT;
-    mapping(address => mapping(address => uint256[])) public tiketsForIdo;
+    mapping(address => mapping(address => uint256[])) public ticketsForIdo;
 
     constructor(address _nft, address _ticket) {
         setSweetpadNFT(_nft);
@@ -94,7 +95,7 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
 
     function participate(address sweetpadIdo_) external {
         require(userNFTs[msg.sender].length > 0, "SweetpadIDO: User doesn't have NFTs staked");
-        for(uint256 i; i < userNFTs[msg.sender].length; i++){
+        for (uint256 i; i < userNFTs[msg.sender].length; i++) {
             ticket.mint(msg.sender, ticketsPerNFT[userNFTs[msg.sender][i]], sweetpadIdo_);
         }
     }
@@ -104,6 +105,10 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
      */
     function getNftsFrozeByUser(address user) external view override returns (uint256[] memory) {
         return userNFTs[user];
+    }
+
+    function getTicketsForIdo(address user_, address ido_) external view override returns(uint256[] memory) {
+        return ticketsForIdo[user_][ido_];
     }
 
     function blocksPerDay() external pure override returns (uint256) {
@@ -127,14 +132,20 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         require(newTicket != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
         ticket = ISweetpadTicket(newTicket);
     }
+
     function setSweetpadLottery(address lottery_) public override onlyOwner {
         require(lottery_ != address(0), "SweetpadNFTFreezing: Ticket contract address can't be 0");
         lottery = SweetpadLottery(lottery_);
     }
+
     // TODO add only lottery
     // TODO add requiers
-    function addTickets(address to_, address ido_, uint256 ticketId_) external override {
-        tiketsForIdo[to_][ido_].push(ticketId_);
+    function addTickets(
+        address to_,
+        address ido_,
+        uint256 ticketId_
+    ) external override {
+        ticketsForIdo[to_][ido_].push(ticketId_);
     }
 
     function _freeze(
@@ -156,7 +167,10 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
     function _unfreeze(uint256 nftId) private {
         NFTData memory _nftData = nftData[nftId];
         // slither-disable-next-line incorrect-equality
-        require(checkAbilityToUnfreeze(msg.sender), "SweetpadNFTFreezing: You are participating in IDO that doesn't closed yet");
+        require(
+            checkAbilityToUnfreeze(msg.sender),
+            "SweetpadNFTFreezing: You are participating in IDO that doesn't closed yet"
+        );
         require(_nftData.freezer == msg.sender, "SweetpadNFTFreezing: Wrong unfreezer");
         require(_nftData.freezeEndBlock <= block.number, "SweetpadNFTFreezing: Freeze period don't passed");
         // slither-disable-next-line costly-loop
@@ -177,12 +191,17 @@ contract SweetpadNFTFreezing is ISweetpadNFTFreezing, Ownable, ERC721Holder {
         delete ticketsPerNFT[nftId];
     }
 
-    function checkAbilityToUnfreeze(address user_) internal view returns(bool){
-        for(uint256 i; i < (lottery.getOpenLotteries()).length; i++){
-            if(tiketsForIdo[user_][(lottery.getBasicLottoInfo((lottery.getOpenLotteries())[i])).ido].length > 0){
-                return false;
+    function checkAbilityToUnfreeze(address user_) internal view returns (bool) {
+        if ((lottery.getOpenLotteries()).length > 0) {
+            for (uint256 i; i < (lottery.getOpenLotteries()).length; i++) {
+                if (ticketsForIdo[user_][(lottery.getBasicLottoInfo((lottery.getOpenLotteries())[i])).ido].length > 0) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
-            else return true;
+        } else {
+            return true;
         }
     }
 }

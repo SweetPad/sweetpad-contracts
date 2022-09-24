@@ -17,13 +17,24 @@ const setupFixture = createFixture(async () => {
 
 	const sweetToken = await getContract("SweetpadToken");
 	const sweetpadIDO = await getContract("SweetpadIDO");
-	const lottery = await getContract("SweetpadLottery");
+	const lottery = await getContract("SweetpadLotteryMock");
 	const sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing");
+	const sweetpadNFT = await getContract("SweetpadNFT");
 	const sweetpadTicket = await getContract("SweetpadTicket");
 	const sweetpadFreezing = await getContract("SweetpadFreezing");
 	const asset = await getContract("AssetMock");
+	await asset.transfer(sweetpadIDO.address, parseEther("10000"));
 
-	return [sweetpadFreezing, sweetToken, sweetpadIDO, lottery, sweetpadNFTFreezing, sweetpadTicket, asset];
+	return [
+		sweetpadFreezing,
+		sweetToken,
+		sweetpadIDO,
+		lottery,
+		sweetpadNFTFreezing,
+		sweetpadTicket,
+		sweetpadNFT,
+		asset
+	];
 });
 
 describe("SweetpadIDO", function () {
@@ -36,6 +47,7 @@ describe("SweetpadIDO", function () {
 		lottery,
 		sweetpadNFTFreezing,
 		sweetpadTicket,
+		sweetpadNFT,
 		asset;
 
 	const daysToBlocks = async (days) => {
@@ -47,22 +59,36 @@ describe("SweetpadIDO", function () {
 	});
 
 	beforeEach(async function () {
-		[sweetpadFreezing, sweetToken, sweetpadIDO, lottery, sweetpadNFTFreezing, sweetpadTicket, asset] =
+		[sweetpadFreezing, sweetToken, sweetpadIDO, lottery, sweetpadNFTFreezing, sweetpadTicket, sweetpadNFT, asset] =
 			await setupFixture();
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("100000"));
 		const blockNumber = await ethers.provider.getBlockNumber();
 		await sweetpadIDO.setup(
 			1500,
 			8500,
-			50000,
-			2000,
-			parseEther("100000"),
+			30000,
+			0,
+			parseEther("10000"),
 			parseEther("0.05"),
+			parseEther("0.01"),
 			blockNumber + 10,
 			blockNumber + 100,
 			blockNumber + 101,
 			blockNumber + 200
 		);
+
+		await sweetpadNFT.safeMintBatch(deployer.address, [0, 0]);
+		await sweetpadNFT.safeMintBatch(caller.address, [0]);
+		await sweetpadNFT.setApprovalForAll(sweetpadNFTFreezing.address, true);
+		await sweetpadNFT.connect(caller).setApprovalForAll(sweetpadNFTFreezing.address, true);
+		await sweetpadNFTFreezing.freezeBatch([1,2], [1820,1820]);
+		await sweetpadNFTFreezing.connect(caller).freeze(3, 1820);
+		await sweetpadTicket.setNFTFreezing(sweetpadNFTFreezing.address);
+		await sweetpadTicket.transferOwnership(sweetpadNFTFreezing.address);
+		await lottery.createNewLotto(0,0, sweetpadIDO.address);
+		await lottery.getWiningNumbers(1);
+
+		// console.log(((await lottery.getBasicLottoInfo(1)).winningNumbers)[0]);
 	});
 
 	describe("Initialization: ", function () {
@@ -88,6 +114,7 @@ describe("SweetpadIDO", function () {
 				2000,
 				parseEther("10000"),
 				parseEther("0.05"),
+				parseEther("0.01"),
 				blockNumber + 10,
 				blockNumber + 100,
 				blockNumber + 101,
@@ -117,6 +144,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -132,6 +160,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -147,6 +176,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -162,6 +192,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -177,6 +208,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -195,6 +227,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -213,6 +246,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					0,
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -231,6 +265,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					0,
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -250,6 +285,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber - 1,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -266,6 +302,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 100,
 					blockNumber + 50,
 					blockNumber + 101,
@@ -282,6 +319,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 80,
@@ -298,6 +336,7 @@ describe("SweetpadIDO", function () {
 					2000,
 					parseEther("10000"),
 					parseEther("0.05"),
+					parseEther("0.01"),
 					blockNumber + 10,
 					blockNumber + 100,
 					blockNumber + 101,
@@ -312,10 +351,16 @@ describe("SweetpadIDO", function () {
 			await asset.transfer(sweetpadIDO.address, parseEther("50000"));
 			await sweetToken.connect(deployer).approve(sweetpadFreezing.address, parseEther("40000"));
 			await sweetToken.connect(caller).approve(sweetpadFreezing.address, parseEther("10000"));
-			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), await daysToBlocks(10));
-			await sweetpadFreezing.connect(caller).freezeSWT(parseEther("10000"), await daysToBlocks(10));
-			console.log((await sweetpadFreezing.totalPower(deployer.address)).toString());
-			console.log((await sweetpadFreezing.totalPower(caller.address)).toString());
+			await sweetpadFreezing.connect(deployer).freezeSWT(parseEther("40000"), await daysToBlocks(50));
+			await sweetpadFreezing.connect(caller).freezeSWT(parseEther("10000"), await daysToBlocks(100));
+			// console.log((await sweetpadFreezing.totalPower(deployer.address)).toString());
+			// console.log((await sweetpadFreezing.totalPower(caller.address)).toString());
+			await sweetpadNFTFreezing.participate(sweetpadIDO.address);
+			await sweetpadNFTFreezing.connect(caller).participate(sweetpadIDO.address);
+			// console.log(await sweetpadNFTFreezing.getTicketsForIdo(deployer.address, sweetpadIDO.address));
+			// console.log("number of winning tickets", (await sweetpadIDO.getNumberOfWinningTickets(deployer.address)).toString());
+			// console.log("allocation", (await sweetpadIDO.getAllocationFromLottery(deployer.address)).toString());
+			console.log(await lottery._split());
 		});
 	});
 });

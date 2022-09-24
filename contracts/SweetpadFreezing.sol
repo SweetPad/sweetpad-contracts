@@ -79,7 +79,7 @@ contract SweetpadFreezing is ISweetpadFreezing, Ownable {
      * @param amount_ Amount of tokens to freeze
      * @param period_ Period of freezing
      */
-    function freezeLP(uint256 amount_, uint256 period_) external override {
+    function freezeLP(uint256 amount_, uint256 period_) external override { 
         uint256 power = (getPower(amount_, period_) * multiplier) / 100;
         require(power >= 10000 ether, "SweetpadFreezing: At least 10.000 xSWT is required");
         _freeze(msg.sender, amount_, period_, power, 1);

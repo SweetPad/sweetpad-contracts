@@ -34,8 +34,8 @@ describe("SweetpadFreezing", function () {
 
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, lpToken] = await setupFixture();
-		minPeriod = await daysToBlocks(5);
-		maxPeriod = await daysToBlocks(30);
+		minPeriod = await daysToBlocks(50);
+		maxPeriod = await daysToBlocks(300);
 		await sweetpadFreezing.setMultiplier(250);
 		await sweetpadFreezing.setLPToken(lpToken.address);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));
@@ -47,10 +47,10 @@ describe("SweetpadFreezing", function () {
 			expect(await sweetpadFreezing.sweetToken()).to.equal(sweetToken.address);
 			expect(await sweetpadFreezing.getBlocksPerDay()).to.equal(1);
 			expect(await sweetpadFreezing.getMinFreezePeriod()).to.equal(
-				(await sweetpadFreezing.getBlocksPerDay()).mul(5)
+				(await sweetpadFreezing.getBlocksPerDay()).mul(50)
 			);
 			expect(await sweetpadFreezing.getMaxFreezePeriod()).to.equal(
-				(await sweetpadFreezing.getBlocksPerDay()).mul(30)
+				(await sweetpadFreezing.getBlocksPerDay()).mul(300)
 			);
 		});
 	});
@@ -58,10 +58,10 @@ describe("SweetpadFreezing", function () {
 	describe("FreezeSWT function", function () {
 		it("Should revert with 'SweetpadFreezing: Wrong period'", async function () {
 			await expect(
-				sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), await daysToBlocks(181))
+				sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), await daysToBlocks(49))
 			).to.be.revertedWith("SweetpadFreezing: Wrong period");
 			await expect(
-				sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), await daysToBlocks(1100))
+				sweetpadFreezing.connect(deployer).freezeSWT(parseEther("10000"), await daysToBlocks(301))
 			).to.be.revertedWith("SweetpadFreezing: Wrong period");
 		});
 
@@ -236,10 +236,10 @@ describe("SweetpadFreezing", function () {
 	describe("FreezeLP function", function () {
 		it("Should revert with 'SweetpadFreezing: Wrong period'", async function () {
 			await expect(
-				sweetpadFreezing.connect(deployer).freezeLP(parseEther("10000"), await daysToBlocks(181))
+				sweetpadFreezing.connect(deployer).freezeLP(parseEther("10000"), await daysToBlocks(49))
 			).to.be.revertedWith("SweetpadFreezing: Wrong period");
 			await expect(
-				sweetpadFreezing.connect(deployer).freezeLP(parseEther("10000"), await daysToBlocks(1100))
+				sweetpadFreezing.connect(deployer).freezeLP(parseEther("10000"), await daysToBlocks(301))
 			).to.be.revertedWith("SweetpadFreezing: Wrong period");
 		});
 

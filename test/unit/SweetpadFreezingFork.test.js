@@ -46,7 +46,7 @@ describe("SweetpadFreezingFork", function () {
 
 	beforeEach(async function () {
 		[sweetpadFreezing, sweetToken, router, factory, weth] = await setupFixture();
-		oneYear = await daysToBlocks(10);
+		oneYear = await daysToBlocks(100);
 		await sweetpadFreezing.setMultiplier(250);
 		await sweetToken.connect(deployer).transfer(caller.address, parseEther("15000"));
 		await sweetToken.connect(deployer).approve(router.address, ethers.utils.parseUnits("10000000"));

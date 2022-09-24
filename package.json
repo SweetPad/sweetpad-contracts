@@ -12,6 +12,7 @@
 		"verify:rinkeby": "npx hardhat etherscan-verify --network rinkeby --solc-input",
 		"deploy:bsc-testnet": "npx hardhat deploy --network bsc-testnet",
 		"verify:bsc": "npx hardhat etherscan-verify --network bsc --solc-input",
+		"verify:goerli": "npx hardhat etherscan-verify --network goerli --solc-input",
 		"node": "npx hardhat node --no-deploy",
 		"eslint": "npx eslint deploy/**/*.js test/**/*.js tasks/**/*.js",
 		"eslint:fix": "npx eslint --fix deploy/**/*.js test/**/*.js tasks/**/*.js",

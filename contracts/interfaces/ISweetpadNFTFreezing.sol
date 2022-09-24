@@ -38,6 +38,8 @@ interface ISweetpadNFTFreezing {
 
     function getNftsFrozeByUser(address) external view returns (uint256[] memory);
 
+    function getTicketsForIdo(address, address) external view returns (uint256[] memory);
+
     function setSweetpadNFT(address) external;
 
     function setSweetpadTicket(address) external;

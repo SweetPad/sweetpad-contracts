@@ -23,12 +23,14 @@ contract SweetpadIDO is AccessControl {
     uint256 public tokensToSell;
     uint256 public availableTokensToSell;
     uint256 public tokenPrice;
+    // amount of BUSD per ticket that user can buy tokens
+    uint256 public allocationPerTicket;
     uint256 public idoSaleStart;
     uint256 public idoSecondSaleStart;
     uint256 public idoSaleEnd;
     uint256 public idoSecondSaleEnd;
     // TODO set correct address
-    IERC20 public BUSD = IERC20(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    IERC20 public BUSD = IERC20(0x6147Bc9c226748B47BFeA290f58CD0E5dC2E5D72);
     IERC20 public asset;
     // TODO add comment how to get value for role
     bytes32 public constant CLIENT_ROLE = 0xa5ff3ec7a96cdbba4d2d5172d66bbc73c6db3885f29b21be5da9fa7a7c025232;
@@ -62,6 +64,7 @@ contract SweetpadIDO is AccessControl {
         uint256 commission_,
         uint256 tokensToSell_,
         uint256 tokenPrice_,
+        uint256 allocationPerTicket_,
         // block numbers to control ido sale start and end
         uint256 idoSaleStart_,
         uint256 idoSaleEnd_,
@@ -80,10 +83,11 @@ contract SweetpadIDO is AccessControl {
         require(totalPower_ > 0, "SweetpadIDO: TotalPower can't be zero");
         require(tokensToSell_ > 0, "SweetpadIDO: TokensToSell can't be zero");
         require(tokenPrice_ > 0, "SweetpadIDO: TokenPrice can't be zero");
+        require(allocationPerTicket_ > 0, "SweetpadIDO: Allocation per ticket can't be zero");
         require(idoSaleStart_ >= block.number, "SweetpadIDO: Invalid block number");
         require(idoSaleEnd_ > idoSaleStart_, "SweetpadIDO: IDO sale end block must be greater then start block");
         require(
-            idoSecondSaleStart_ > idoSaleEnd_,
+            idoSecondSaleStart_ > idoSaleEnd_, 
             "SweetpadIDO: IDO second sale start block must be greater then first end block"
         );
         require(
@@ -97,6 +101,7 @@ contract SweetpadIDO is AccessControl {
         tokensToSell = tokensToSell_;
         availableTokensToSell = tokensToSell_;
         tokenPrice = tokenPrice_;
+        allocationPerTicket = allocationPerTicket_;
 
         idoSaleStart = idoSaleStart_;
         idoSaleEnd = idoSaleEnd_;
@@ -156,5 +161,46 @@ contract SweetpadIDO is AccessControl {
         asset.safeTransfer(msg.sender, (amount_ * 1e18) / tokenPrice);
         tokensBoughtSecondStage[msg.sender] += (amount_ * 1e18) / tokenPrice;
         availableTokensToSell -= (amount_ * 1e18) / tokenPrice;
+    }
+
+    function buyFromWonTickets(uint256 amount_) external {
+        // uint256 numberOfTickets = getNumberOfWinningTickets(msg.sender);
+        uint256 allocation = getAllocationFromLottery(msg.sender);
+        require(allocation >= amount_, "SweetpadIDO: Insufficient allocation");
+        // User pays for tokens
+        BUSD.safeTransferFrom(msg.sender, address(this), amount_);
+        // User get assets
+        asset.safeTransfer(msg.sender, (amount_ * 1e18) / tokenPrice);
+    }
+
+    function getWinningTicketsNumber() external view returns (uint256) {
+        return getNumberOfWinningTickets(msg.sender);
+    }
+
+    function getNumberOfWinningTickets(address user_) public view returns (uint256 numberOfWinningTickets) {
+        uint16[] memory winningNumbers = (sweetpadLottery.getBasicLottoInfo(sweetpadLottery.idoToId(address(this))))
+            .winningNumbers;
+        uint256[] memory tickets = sweetpadNFTFreezing.getTicketsForIdo(user_, address(this));
+        for (uint256 i; i < winningNumbers.length; i++) {
+            for (uint256 j; j < tickets.length; j++) {
+                if (tickets[j] == 0) {
+                    continue;
+                }
+                if (winningNumbers[i] == tickets[j]) {
+                    if (j != tickets.length - 1) {
+                        tickets[j] = tickets[tickets.length - 1];
+                    }
+                    tickets[tickets.length - 1] = 0;
+                    numberOfWinningTickets += 1;
+                }
+            }
+        }
+        return numberOfWinningTickets;
+    }
+
+    function getAllocationFromLottery(address user_) public view returns (uint256 allocation) {
+        uint256 numberOfTickets = getNumberOfWinningTickets(user_);
+        allocation = numberOfTickets * allocationPerTicket;
+        return allocation;
     }
 }

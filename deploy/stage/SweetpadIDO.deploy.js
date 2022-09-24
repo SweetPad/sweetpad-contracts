@@ -1,6 +1,6 @@
 module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, getContract, utils } }) => {
-	const { deployer, owner } = await getNamedSigners();
-	const lottery = await getContract("SweetpadLotteryMock");
+	const { deployer } = await getNamedSigners();
+	const lottery = await getContract("SweetpadLottery");
 	const sweetpadNFTFreezing = await getContract("SweetpadNFTFreezing");
 	const sweetpadTicket = await getContract("SweetpadTicket");
 	const sweetpadFreezing = await getContract("SweetpadFreezing");
@@ -14,7 +14,7 @@ module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, ge
 			sweetpadNFTFreezing.address,
 			lottery.address,
 			asset.address,
-			owner.address,
+			deployer.address,
 			deployer.address
 		],
 		log: true
@@ -25,5 +25,5 @@ module.exports = async ({ deployments: { deploy }, ethers: { getNamedSigners, ge
 	return sweetpadIDO;
 };
 
-module.exports.tags = ["SweetpadIDO", "dev"];
-module.exports.dependencies = ["SweetpadNFTFreezing", "SweetpadLotteryMock", "SweetpadFreezing", "AssetMock"];
+module.exports.tags = ["SweetpadIDO", "stage"];
+module.exports.dependencies = ["SweetpadNFTFreezing", "SweetpadLottery", "SweetpadFreezing", "AssetMock"];

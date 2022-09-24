@@ -58,15 +58,15 @@ module.exports = {
 			tags: ["stage"],
 			deploy: ["./deploy/stage"]
 		},
-		rinkeby: {
-			chainId: 4,
+		goerli: {
+			chainId: 5,
 			accounts: {
 				mnemonic: "decide sphere amateur six misery tattoo happy cluster indoor topple clerk message",
 				path: "m/44'/60'/0'/0",
 				initialIndex: 0,
 				count: 20
 			},
-			url: `https://eth-rinkeby.alchemyapi.io/v2/${ALCHEMY_API_KEY}`,
+			url: "https://goerli.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161",
 			tags: ["stage"],
 			deploy: ["./deploy/stage"]
 		}

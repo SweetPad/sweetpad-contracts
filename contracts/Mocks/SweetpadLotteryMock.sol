@@ -10,15 +10,14 @@ import "@openzeppelin/contracts/utils/Address.sol";
 // Inherited allowing for ownership of contract
 import "@openzeppelin/contracts/access/Ownable.sol";
 // Allows for intergration with ChainLink VRF
-import "./interfaces/IRandomNumberGenerator.sol";
 // Interface for Lottery NFT to mint tokens
-import "./interfaces/ISweetpadTicket.sol";
+import "../interfaces/ISweetpadTicket.sol";
 import "hardhat/console.sol";
 
 // Allows for time manipulation. Set to 0x address on test/mainnet deploy
 // import "./Testable.sol";
 
-contract SweetpadLottery is Ownable {
+contract SweetpadLotteryMock is Ownable {
     // Libraries
     using SafeMath for uint256;
     // Safe ERC20
@@ -33,7 +32,6 @@ contract SweetpadLottery is Ownable {
     // TODO check
     // ISweetpadTicket internal nft_;
     // Storing of the randomness generator
-    IRandomNumberGenerator internal randomGenerator_;
     // Request ID for random number
     bytes32 internal requestId_;
     // Counter for lottery IDs
@@ -64,8 +62,8 @@ contract SweetpadLottery is Ownable {
         uint16[] winningNumbers; // The winning numbers
     }
     // Lottery ID's to info
-    mapping(uint256 => LottoInfo) internal allLotteries_;
-    mapping(uint256 => uint256) public rendomNumbers;
+    mapping(uint256 => LottoInfo) public allLotteries_;
+    mapping(uint256 => uint256) internal rendomNumbers;
     mapping(address => uint256) public idoToId;
 
     //-------------------------------------------------------------------------
@@ -85,17 +83,6 @@ contract SweetpadLottery is Ownable {
     //-------------------------------------------------------------------------
     // MODIFIERS
     //-------------------------------------------------------------------------
-
-    modifier onlyRandomGenerator() {
-        require(msg.sender == address(randomGenerator_), "Only random generator");
-        _;
-    }
-
-    modifier notContract() {
-        require(!address(msg.sender).isContract(), "contract not allowed");
-        require(msg.sender == tx.origin, "proxy contract not allowed");
-        _;
-    }
 
     //-------------------------------------------------------------------------
     // CONSTRUCTOR
@@ -162,11 +149,6 @@ contract SweetpadLottery is Ownable {
     //-------------------------------------------------------------------------
     // Restricted Access Functions (onlyOwner)
 
-    function setRendomGenerator(address randomNumberGenerator_) external onlyOwner {
-        require(randomNumberGenerator_ != address(0), "Contracts cannot be 0 address");
-        randomGenerator_ = IRandomNumberGenerator(randomNumberGenerator_);
-    }
-
     function updateSizeOfLottery(uint16 _newSize) external onlyOwner {
         require(sizeOfLottery_ != _newSize, "Cannot set to current size");
         require(sizeOfLottery_ != 0, "Lottery size cannot be 0");
@@ -183,40 +165,10 @@ contract SweetpadLottery is Ownable {
         emit UpdatedMaxRange(msg.sender, _newMaxRange);
     }
 
-    function drawWinningNumbers(uint256 _lotteryId) external onlyOwner {
-        // Checks that the lottery is past the closing block
-        require(
-            allLotteries_[_lotteryId].closingTimestamp <= block.timestamp,
-            "Cannot set winning numbers during lottery"
-        );
-        // Checks lottery numbers have not already been drawn
-        require(allLotteries_[_lotteryId].lotteryStatus == Status.Open || allLotteries_[_lotteryId].lotteryStatus == Status.NotStarted, "Lottery State incorrect for draw");
-        // Sets lottery status to closed
-        allLotteries_[_lotteryId].lotteryStatus = Status.Closed;
-        // Requests a random number from the generator
-        requestId_ = randomGenerator_.getRandomNumber(_lotteryId);
-        // Emits that random number has been requested
-        emit RequestNumbers(_lotteryId, requestId_);
-    }
-
-    function numbersDrawn(
-        uint256 _lotteryId,
-        bytes32 _requestId,
-        uint256 _randomNumber
-    ) external onlyRandomGenerator {
-        require(allLotteries_[_lotteryId].lotteryStatus == Status.Closed, "Draw numbers first");
-        if (requestId_ == _requestId) {
-            allLotteries_[_lotteryId].lotteryStatus = Status.Completed;
-            // allLotteries_[_lotteryId].winningNumbers = _split(_randomNumber); // TODO
-        }
-        rendomNumbers[_lotteryId] = _randomNumber;
-        // TODO fix
-        // emit LotteryClose(_lotteryId, nft_.getTotalSupply());
-    }
-
     function getWiningNumbers(uint256 _lotteryId) external {
-        require(allLotteries_[_lotteryId].lotteryStatus == Status.Completed, "Draw numbers first");
-        allLotteries_[_lotteryId].winningNumbers = _split(rendomNumbers[_lotteryId]);
+        // require(allLotteries_[_lotteryId].lotteryStatus == Status.Completed, "Draw numbers first");
+        allLotteries_[_lotteryId].winningNumbers = [1, 1, 1, 1, 5, 6, 7, 8, 9];
+        // console.log(" ~ file: SweetpadLotteryMock.sol ~ line 172", allLotteries_[_lotteryId].winningNumbers[0]);
     }
 
     // * @param   _prizeDistribution An array defining the distribution of the
@@ -242,18 +194,37 @@ contract SweetpadLottery is Ownable {
         uint256 _closingTimestamp,
         address _ido
     ) external onlyOwner returns (uint256 lotteryId) {
-        require(_startingTimestamp != 0 && _startingTimestamp < _closingTimestamp, "Timestamps for lottery invalid");
+        // require(
+        //     _prizeDistribution.length == sizeOfLottery_,
+        //     "Invalid distribution"
+        // );
+        // uint256 prizeDistributionTotal = 0;
+        // for (uint256 j = 0; j < _prizeDistribution.length; j++) {
+        //     prizeDistributionTotal = prizeDistributionTotal.add(
+        //         uint256(_prizeDistribution[j])
+        //     );
+        // }
+        // Ensuring that prize distribution total is 100%
+        // require(
+        //     prizeDistributionTotal == 100,
+        //     "Prize distribution is not 100%"
+        // );
+        // require(
+        //     _prizePoolInCake != 0 && _costPerTicket != 0,
+        //     "Prize or cost cannot be 0"
+        // );
+        // require(_startingTimestamp != 0 && _startingTimestamp < _closingTimestamp, "Timestamps for lottery invalid");
         require(idoToId[_ido] == 0, "SweetpadLottery: Lottery for current IDO contract was already created");
         // Incrementing lottery ID
         lotteryIdCounter_ = lotteryIdCounter_ + 1;
         lotteryId = lotteryIdCounter_;
         uint16[] memory winningNumbers = new uint16[](sizeOfLottery_);
         Status lotteryStatus;
-        if (_startingTimestamp >= block.timestamp) {
-            lotteryStatus = Status.Open;
-        } else {
-            lotteryStatus = Status.NotStarted;
-        }
+        // if (_startingTimestamp >= block.timestamp) {
+        lotteryStatus = Status.Open;
+        // } else {
+        //     lotteryStatus = Status.NotStarted;
+        // }
         // Saving data in struct
         LottoInfo memory newLottery = LottoInfo(
             lotteryId,
@@ -337,27 +308,29 @@ contract SweetpadLottery is Ownable {
         }
     }
 
-    function _split(uint256 _randomNumber) internal view returns (uint16[] memory) {
+    function _split() public view returns (uint16[] memory) {
         // Temparary storage for winning numbers
         uint16[] memory winningNumbers = new uint16[](sizeOfLottery_);
         // Loops the size of the number of tickets in the lottery
         for (uint256 i = 0; i < sizeOfLottery_; i++) {
-            // uint256 duplicated;
+            uint256 duplicated;
             // Encodes the random number with its position in loop
-            bytes32 hashOfRandom = keccak256(abi.encodePacked(_randomNumber, i));
+            bytes32 hashOfRandom = keccak256(
+                abi.encodePacked("0x8ba28b464185c48a3e1a05aec7116d926a90695d7360ceac9cc4b8e4369b52e5", i)
+            );
             // Casts random number hash into uint256
             uint256 numberRepresentation = uint256(hashOfRandom);
             // Sets the winning number position to a uint16 of random hash number
-            // for (uint256 j = 0; j < winningNumbers.length; j++) {
-            //     if (winningNumbers[j] > 0) {
-            //         if (winningNumbers[j] == uint16(numberRepresentation.mod(maxValidRange_))) {
-            //             duplicated += 1;
-            //         }
-            //     }
-            // }
-            // if (duplicated > 0) {
-            //     continue;
-            // }
+            for (uint256 j = 0; j < winningNumbers.length; j++) {
+                if (winningNumbers[j] > 0) {
+                    if (winningNumbers[j] == uint16(numberRepresentation.mod(maxValidRange_))) {
+                        duplicated += 1;
+                    }
+                }
+            }
+            if (duplicated > 0) {
+                continue;
+            }
             winningNumbers[i] = uint16(numberRepresentation.mod(maxValidRange_));
         }
         return winningNumbers;

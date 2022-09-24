@@ -1,11 +1,11 @@
 module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, getContract }}) => {
 	const { deployer } = await getNamedSigners();
-
+	const sweetpadNFT = await getContract("SweetpadNFT");
 	try {
 		await deploy("SweetpadTicket", {
 			from: deployer.address,
 			contract: "SweetpadTicket",
-			args: [],
+			args: [sweetpadNFT.address],
 			log: true,
 		});
 	} catch (error) {
@@ -19,3 +19,4 @@ module.exports = async ({deployments: { deploy }, ethers: { getNamedSigners, get
 };
 
 module.exports.tags = ["SweetpadTicket", "stage"];
+module.exports.dependencies = ["SweetpadNFT"];

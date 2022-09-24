@@ -38,22 +38,22 @@ contract SweetpadTicket is ISweetpadTicket, ERC721, Ownable {
 
     function mint(
         address to_,
-        uint256 amount_,
-        address sweetpadIdo_
+        uint256 amount_, 
+        address sweetpadIdo_ 
     ) external override onlyOwner {
         // TODO
         for (uint256 i; i < amount_; i++) {
+            currentId[sweetpadIdo_]++;
             _mint(to_, currentId[sweetpadIdo_]);
             nftFreezing.addTickets(to_, sweetpadIdo_, currentId[sweetpadIdo_]);
-            currentId[sweetpadIdo_]++;
         }
     }
 
-    function safeTransferFrom(
+// TODO fix to revert safeTransferFrom too
+    function transferFrom(
         address,
         address,
-        uint256,
-        bytes memory
+        uint256
     ) public virtual override(ERC721, IERC721) {
         revert("SweetpadTicket: can't transfer tickets");
     }

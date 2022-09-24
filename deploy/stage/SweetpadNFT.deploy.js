@@ -1,5 +1,5 @@
 module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSigners, getContract } }) {
-	const { deployer, owner } = await getNamedSigners();
+	const { deployer } = await getNamedSigners();
 	let sweetpadNFT;
 	
 	try {
@@ -12,7 +12,7 @@ module.exports = async function ({ deployments: { deploy }, ethers: { getNamedSi
 
 		sweetpadNFT = await getContract("SweetpadNFT");
 
-		await sweetpadNFT.transferOwnership(owner.address).then((tx) => tx.wait());
+		// await sweetpadNFT.transferOwnership(owner.address).then((tx) => tx.wait());
 	} catch (error) {
 		throw error.message;
 	}
